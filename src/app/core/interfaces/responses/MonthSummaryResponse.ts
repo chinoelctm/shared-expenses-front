@@ -32,6 +32,7 @@ export interface PersonSummary {
 export interface CategorySummary {
     category:   string;
     name:       string;
+    color:      string;
     amount:     number;
     percentage: number;
 }

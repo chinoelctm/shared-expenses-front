@@ -7,7 +7,8 @@ export interface ExpenseResponse {
     amount:       number;
     date:         string;
     category:     string;
-    categoryName: string;
+    categoryName:  string;
+    categoryColor: string;
     isFixed:      boolean;
     isRent:       boolean;
     // Sin paidBy: gasto pagado. Con paidBy: los demás ya le devolvieron su parte a quien pagó

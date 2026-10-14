@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import environment from '../../../assets/config/config.json';
 import { PeopleService } from '../http/people.service';
 import { SettingsService } from '../http/settings.service';
+import { CategoriesService } from '../http/categories.service';
 import { MonthsService } from '../http/months.service';
 import { ExpensesService } from '../http/expenses.service';
 import { BackupService } from '../http/backup.service';
@@ -32,11 +33,19 @@ export interface RepartoPrevio {
   monto:      number;
 }
 
+export interface CategoriaEditada {
+  id:    string | null;
+  name:  string;
+  color: string;
+}
+
 export interface CambiosConfiguracion {
-  personas:        PersonaEditada[];
-  personasBorradas: string[];
-  configuracion:   SettingsRequest;
-  arriendoMes:     RentRequest | null;
+  personas:          PersonaEditada[];
+  personasBorradas:  string[];
+  categorias:        CategoriaEditada[];
+  categoriasBorradas: string[];
+  configuracion:     SettingsRequest;
+  arriendoMes:       RentRequest | null;
 }
 
 /**
@@ -50,6 +59,7 @@ export class PlanillaStore {
 
   private readonly _peopleService = inject(PeopleService);
   private readonly _settingsService = inject(SettingsService);
+  private readonly _categoriesService = inject(CategoriesService);
   private readonly _monthsService = inject(MonthsService);
   private readonly _expensesService = inject(ExpensesService);
   private readonly _backupService = inject(BackupService);
@@ -120,7 +130,7 @@ export class PlanillaStore {
   }
 
   async cargarCategorias() {
-    const resp = await this.ejecutar(() => this._settingsService.obtenerCategorias());
+    const resp = await this.ejecutar(() => this._categoriesService.obtenerCategorias());
     if (resp) this.categorias.set(resp.valor);
   }
 
@@ -260,11 +270,12 @@ export class PlanillaStore {
   }
 
   /**
-   * Aplica en orden: bajas, cambios y altas de personas; luego arriendo base/costos fijos y,
-   * si cambió, el arriendo del mes activo. Si un paso falla se detiene y recarga el estado real.
+   * Aplica en orden: bajas, cambios y altas de personas y de categorías; luego arriendo base/costos
+   * fijos y, si cambió, el arriendo del mes activo. Si un paso falla se detiene y recarga el estado real.
    */
   async guardarConfiguracion(cambios: CambiosConfiguracion) {
     const actuales = new Map(this.personas().map(p => [p.id, p]));
+    const categoriasActuales = new Map(this.categorias().map(c => [c.id, c]));
     const mes = this.mesSeleccionado();
 
     const resp = await this.ejecutar(async () => {
@@ -280,13 +291,28 @@ export class PlanillaStore {
           await this._peopleService.actualizarPersona(persona.id, request);
         }
       }
+
+      // Primero las bajas: así se puede crear una categoría nueva con el nombre de una eliminada
+      for (const id of cambios.categoriasBorradas) {
+        await this._categoriesService.eliminarCategoria(id);
+      }
+      for (const categoria of cambios.categorias) {
+        const request = { name: categoria.name, color: categoria.color };
+        const actual = categoria.id ? categoriasActuales.get(categoria.id) : undefined;
+        if (!categoria.id) {
+          await this._categoriesService.crearCategoria(request);
+        } else if (actual && (actual.name !== request.name || actual.color.toLowerCase() !== request.color.toLowerCase())) {
+          await this._categoriesService.actualizarCategoria(categoria.id, request);
+        }
+      }
+
       await this._settingsService.actualizarConfiguracion(cambios.configuracion);
       if (cambios.arriendoMes) {
         await this._monthsService.actualizarArriendo(mes, cambios.arriendoMes);
       }
     });
 
-    await Promise.all([this.cargarPersonas(), this.cargarConfiguracion(), this.cargarMes()]);
+    await Promise.all([this.cargarPersonas(), this.cargarCategorias(), this.cargarConfiguracion(), this.cargarMes()]);
     if (!resp) return;
 
     this.cerrarModal();

@@ -18,6 +18,16 @@ interface CostoFijoEditable {
   category:    string;
 }
 
+interface CategoriaEditable {
+  id:     string | null;
+  name:   string;
+  color:  string;
+  locked: boolean;
+}
+
+const COLOR_NUEVA_CATEGORIA = '#64748b';
+const COLOR_HEX = /^#[0-9a-fA-F]{6}$/;
+
 @Component({
   selector: 'app-modal-configuracion',
   standalone: true,
@@ -33,6 +43,8 @@ export class ModalConfiguracionComponent implements OnInit {
 
   protected personas: PersonaEditable[] = [];
   protected personasBorradas: string[] = [];
+  protected categorias: CategoriaEditable[] = [];
+  protected categoriasBorradas: string[] = [];
   protected arriendoMesActivo: number | null = null;
   protected arriendoBase: number | null = null;
   protected costosFijos: CostoFijoEditable[] = [];
@@ -43,6 +55,7 @@ export class ModalConfiguracionComponent implements OnInit {
   ngOnInit(): void {
     const config = this.store.configuracion();
     this.personas = this.store.personas().map(p => ({ id: p.id, name: p.name, contribution: p.contribution }));
+    this.categorias = this.store.categorias().map(c => ({ id: c.id, name: c.name, color: c.color, locked: c.locked }));
     this.arriendoMesOriginal = this.store.arriendo()?.amount ?? config?.defaultRent ?? 0;
     this.arriendoMesActivo = this.arriendoMesOriginal;
     this.arriendoBase = config?.defaultRent ?? 0;
@@ -67,6 +80,29 @@ export class ModalConfiguracionComponent implements OnInit {
     const persona = this.personas[indice];
     if (persona.id) this.personasBorradas = [...this.personasBorradas, persona.id];
     this.personas = this.personas.filter((_, i) => i !== indice);
+  }
+
+  protected agregarCategoria() {
+    this.categorias = [...this.categorias, { id: null, name: '', color: COLOR_NUEVA_CATEGORIA, locked: false }];
+  }
+
+  protected quitarCategoria(indice: number) {
+    const categoria = this.categorias[indice];
+    if (categoria.locked) return;
+    if (categoria.id) this.categoriasBorradas = [...this.categoriasBorradas, categoria.id];
+    this.categorias = this.categorias.filter((_, i) => i !== indice);
+  }
+
+  /**
+   * Opciones de categoría para un costo fijo: las activas y, si el costo usa una categoría eliminada,
+   * esa también (para no perderla al guardar).
+   */
+  protected opcionesCategoria(costo: CostoFijoEditable): { id: string; nombre: string }[] {
+    const activas = this.store.categorias().map(c => ({ id: c.id, nombre: c.name }));
+    if (activas.some(c => c.id === costo.category)) return activas;
+
+    const original = this.store.configuracion()?.fixedCosts.find(cf => cf.category === costo.category);
+    return [...activas, { id: costo.category, nombre: `${original?.categoryName ?? costo.category} (eliminada)` }];
   }
 
   protected agregarCosto() {
@@ -94,12 +130,25 @@ export class ModalConfiguracionComponent implements OnInit {
       return;
     }
 
+    const categorias = this.categorias.map(c => ({ id: c.id, name: c.name.trim(), color: c.color }));
+    if (categorias.some(c => !c.name || !COLOR_HEX.test(c.color))) {
+      this._toastService.mostrar('Cada categoría necesita nombre y un color válido.', '⚠️');
+      return;
+    }
+    const nombresCategoria = categorias.map(c => c.name.toLowerCase());
+    if (new Set(nombresCategoria).size !== nombresCategoria.length) {
+      this._toastService.mostrar('Hay dos categorías con el mismo nombre.', '⚠️');
+      return;
+    }
+
     const arriendoMes = Math.round(Number(this.arriendoMesActivo)) || 0;
 
     this.guardando = true;
     await this.store.guardarConfiguracion({
       personas,
       personasBorradas: this.personasBorradas,
+      categorias,
+      categoriasBorradas: this.categoriasBorradas,
       configuracion: {
         defaultRent: Math.round(Number(this.arriendoBase)) || 0,
         fixedCosts: this.costosFijos

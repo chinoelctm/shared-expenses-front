@@ -37,16 +37,16 @@ el nombre ya estaba tomado), actualiza `src/environments/environment.ts` y haz p
 ```
 src/app
 ├── core
-│   ├── http/          Un servicio por recurso de la API: people, settings (+ categorías), months,
+│   ├── http/          Un servicio por recurso de la API: people, categories, settings, months,
 │   │                  expenses, backup. Todos async con lastValueFrom.
 │   ├── interceptors/  authInterceptor (Bearer token)
 │   ├── interfaces/    requests/ y responses/ (contratos de la API) + tipos de UI
-│   ├── pipes/         pesoChileno, nombreMes, fechaCorta, categoriaColor
+│   ├── pipes/         pesoChileno, nombreMes, fechaCorta
 │   ├── state/         PlanillaStore: estado de la planilla (signals) y acciones
 │   └── utils/         Errores de la API, vista previa de repartos, fechas, toast, confirmación, colores
 ├── modulos
 │   └── planilla-gastos/   Página principal + componentes (KPIs, gráfico, tabla, modales)
-└── shared/            header, toast, confirm-dialog
+└── shared/            header, toast, confirm-dialog, categoria-badge (color de la API)
 ```
 
 ## Qué calcula cada lado

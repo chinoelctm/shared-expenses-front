@@ -11,7 +11,6 @@ import { ExpenseResponse } from '../../../../core/interfaces/responses/ExpenseRe
 
 const MAX_CUOTAS = 48;
 const CUOTAS_POR_DEFECTO = 3;
-const CATEGORIA_POR_DEFECTO = 'Supermarket';
 
 @Component({
   selector: 'app-modal-gasto',
@@ -35,7 +34,8 @@ export class ModalGastoComponent implements OnInit {
   protected descripcion = '';
   protected monto: number | null = null;
   protected fecha = '';
-  protected categoria = CATEGORIA_POR_DEFECTO;
+  // Por defecto, la primera categoría activa
+  protected categoria = this.store.categorias()[0]?.id ?? '';
   protected pagado = false;
   // Id de quien pagó el total ('' = nadie todavía)
   protected pagadoPor = '';
@@ -61,6 +61,13 @@ export class ModalGastoComponent implements OnInit {
     // Si se está viendo otro mes, el gasto nuevo se propone en ese mes
     const mes = this.store.mesSeleccionado();
     this.fecha = mes === this._fechaService.claveMesHoy() ? this._fechaService.fechaHoy() : `${mes}-01`;
+  }
+
+  /** Si el gasto usa una categoría eliminada, se mantiene como opción para no perderla al editar. */
+  protected get categoriaEliminada(): { id: string; nombre: string } | null {
+    const gasto = this.gastoOriginal;
+    if (!gasto || this.store.categorias().some(c => c.id === gasto.category)) return null;
+    return { id: gasto.category, nombre: `${gasto.categoryName} (eliminada)` };
   }
 
   protected get titulo(): string {

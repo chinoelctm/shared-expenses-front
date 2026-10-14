@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core
 import { PlanillaStore } from '../../../../core/state/planilla.store';
 import { ConfirmService } from '../../../../core/utils/confirm.service';
 import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
-import { CategoriaColorPipe } from '../../../../core/pipes/categoria-color.pipe';
+import { CategoriaBadgeComponent } from '../../../../shared/categoria-badge/categoria-badge.component';
 import { FechaCortaPipe } from '../../../../core/pipes/fecha-corta.pipe';
 import { ExpenseResponse } from '../../../../core/interfaces/responses/ExpenseResponse';
 import { coloresPersona } from '../../../../core/utils/persona-colores';
@@ -10,7 +10,7 @@ import { coloresPersona } from '../../../../core/utils/persona-colores';
 @Component({
   selector: 'tr[app-fila-gasto]',
   standalone: true,
-  imports: [PesoChilenoPipe, CategoriaColorPipe, FechaCortaPipe],
+  imports: [PesoChilenoPipe, CategoriaBadgeComponent, FechaCortaPipe],
   templateUrl: './fila-gasto.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'claseFila' }

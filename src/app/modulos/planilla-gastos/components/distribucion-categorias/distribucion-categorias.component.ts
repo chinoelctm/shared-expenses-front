@@ -1,6 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Tooltip } from 'chart.js';
-import environment from '../../../../../assets/config/config.json';
 import { PlanillaStore } from '../../../../core/state/planilla.store';
 import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
 import { CategoriaResumen } from '../../../../core/interfaces/Planilla';
@@ -20,16 +19,15 @@ export class DistribucionCategoriasComponent implements AfterViewInit, OnDestroy
 
   protected readonly store = inject(PlanillaStore);
 
-  // Montos y porcentajes vienen calculados por la API; aquí solo se asigna el color
-  protected readonly categorias = computed<CategoriaResumen[]>(() => {
-    const paleta = environment.PaletaCategorias;
-    return (this.store.resumen()?.categories ?? []).map((c, i) => ({
+  // Montos, porcentajes y colores (los configurados por categoría) vienen de la API
+  protected readonly categorias = computed<CategoriaResumen[]>(() =>
+    (this.store.resumen()?.categories ?? []).map(c => ({
       nombre: c.name,
       monto: c.amount,
       porcentaje: c.percentage,
-      color: paleta[i % paleta.length]
-    }));
-  });
+      color: c.color
+    }))
+  );
 
   private readonly _pesoChileno = new PesoChilenoPipe();
   private readonly vistaLista = signal(false);

@@ -9,5 +9,6 @@ export interface FixedCostResponse {
     description:  string;
     amount:       number;
     category:     string;
-    categoryName: string;
+    categoryName:  string;
+    categoryColor: string;
 }

@@ -4,7 +4,6 @@ import { lastValueFrom } from 'rxjs';
 import { apiUrl } from './api';
 import { SettingsResponse } from '../interfaces/responses/SettingsResponse';
 import { SettingsRequest } from '../interfaces/requests/SettingsRequest';
-import { CategoryResponse } from '../interfaces/responses/CategoryResponse';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +18,5 @@ export class SettingsService {
 
   async actualizarConfiguracion(request: SettingsRequest): Promise<void> {
     await lastValueFrom(this._http.put<void>(`${apiUrl}/settings`, request));
-  }
-
-  async obtenerCategorias(): Promise<CategoryResponse[]> {
-    return lastValueFrom(this._http.get<CategoryResponse[]>(`${apiUrl}/categories`));
   }
 }

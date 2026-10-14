@@ -1,5 +1,8 @@
 export interface CategoryResponse {
-    id:   number;
-    code: string;
-    name: string;
+    id:     string;
+    name:   string;
+    // Color #rrggbb
+    color:  string;
+    // true si no se puede eliminar (la usa el arriendo de cada mes)
+    locked: boolean;
 }
