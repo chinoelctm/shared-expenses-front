@@ -1,0 +1,119 @@
+<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/80">
+    <div>
+      <h2 class="text-base font-bold text-slate-900 dark:text-white">Planilla de Gastos</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Costos fijos recurrentes y gastos variables (incluyendo cuotas mensuales)</p>
+    </div>
+    <div class="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+      <button type="button" (click)="store.abrirModalArriendo()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-100 transition-colors">
+        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        Editar Arriendo del Mes
+      </button>
+      <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-0.5 text-xs font-medium">
+        @for (filtro of filtros; track filtro.valor) {
+          <button type="button" (click)="store.filtro.set(filtro.valor)"
+                  class="px-3 py-1 rounded-md"
+                  [class]="store.filtro() === filtro.valor ? 'bg-blue-600 text-white font-semibold' : 'text-slate-600 dark:text-slate-300 hover:text-blue-600'">
+            {{ filtro.etiqueta }}
+          </button>
+        }
+      </div>
+      <button type="button" (click)="store.abrirModalNuevoGasto()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Nuevo Gasto
+      </button>
+    </div>
+  </div>
+  <div class="overflow-x-auto" [class.opacity-60]="store.cargando()">
+    <table class="w-full text-left text-sm border-collapse">
+      <thead>
+        <tr class="bg-blue-600 text-white font-semibold text-xs uppercase tracking-wider">
+          <th class="py-3 px-4">Descripción</th>
+          <th class="py-3 px-3">Categoría</th>
+          <th class="py-3 px-3 text-center">Fecha</th>
+          <th class="py-3 px-4 text-right">Monto Total</th>
+          @for (persona of store.personas(); track persona.id; let par = $even) {
+            <th class="py-3 px-4 text-right whitespace-nowrap" [class]="par ? 'bg-blue-700/80' : 'bg-blue-800/80'">
+              {{ persona.name }} ({{ persona.percentage }}%)
+            </th>
+          }
+          <th class="py-3 px-3 text-center">Estado</th>
+          <th class="py-3 px-3 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+        @if (store.gastosFiltrados().length === 0) {
+          <tr>
+            <td [attr.colspan]="totalColumnas()" class="text-center py-10 text-slate-400">No hay gastos registrados en esta vista. ¡Haz clic en "+" para agregar uno!</td>
+          </tr>
+        } @else {
+          @if (store.gastosFijos().length > 0) {
+            <tr class="bg-blue-50/70 dark:bg-slate-800/90 border-y border-blue-200 dark:border-slate-700">
+              <td [attr.colspan]="totalColumnas()" class="py-2.5 px-4 text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Costos Fijos Mensuales (Arriendo &amp; Servicios)</span>
+                  <button type="button" (click)="store.abrirModalArriendo()" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 normal-case">
+                    Editar Arriendo del Mes
+                  </button>
+                </div>
+              </td>
+            </tr>
+            @for (gasto of store.gastosFijos(); track gasto.id) {
+              <tr app-fila-gasto [gasto]="gasto"></tr>
+            }
+          }
+
+          @if (store.gastosVariables().length > 0) {
+            <tr class="bg-slate-100/70 dark:bg-slate-800/60 border-y border-slate-200 dark:border-slate-700">
+              <td [attr.colspan]="totalColumnas()" class="py-2.5 px-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Gastos Compartidos Variables &amp; Cuotas</span>
+              </td>
+            </tr>
+            @for (gasto of store.gastosVariables(); track gasto.id) {
+              <tr app-fila-gasto [gasto]="gasto"></tr>
+            }
+          }
+        }
+      </tbody>
+      <tfoot class="bg-slate-50 dark:bg-slate-900/80 font-bold border-t-2 border-slate-300 dark:border-slate-600 text-xs sm:text-sm">
+        <tr class="bg-amber-50/70 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border-b border-amber-200 dark:border-amber-800/60">
+          <td colspan="3" class="py-2 px-4 font-semibold text-right">Total pendiente de pago:</td>
+          <td class="py-2 px-4 text-right font-bold">{{ resumen()?.payments?.pending | pesoChileno }}</td>
+          @for (total of totalesPorPersona(); track $index) {
+            <td class="py-2 px-4 text-right font-bold">{{ total?.pending | pesoChileno }}</td>
+          }
+          <td colspan="2"></td>
+        </tr>
+        <tr class="text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+          <td colspan="3" class="py-2 px-4 font-semibold text-right">Subtotal Gastos Variables:</td>
+          <td class="py-2 px-4 text-right font-bold">{{ resumen()?.variableTotal | pesoChileno }}</td>
+          @for (total of totalesPorPersona(); track $index) {
+            <td class="py-2 px-4 text-right font-bold" [class]="colores($index).texto">{{ total?.variable | pesoChileno }}</td>
+          }
+          <td colspan="2"></td>
+        </tr>
+        <tr class="text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+          <td colspan="3" class="py-2 px-4 font-semibold text-right">Subtotal Costos Fijos:</td>
+          <td class="py-2 px-4 text-right font-bold">{{ resumen()?.fixedTotal | pesoChileno }}</td>
+          @for (total of totalesPorPersona(); track $index) {
+            <td class="py-2 px-4 text-right font-bold" [class]="colores($index).texto">{{ total?.fixed | pesoChileno }}</td>
+          }
+          <td colspan="2"></td>
+        </tr>
+        <tr class="bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+          <td colspan="3" class="py-2 px-4 font-semibold text-right text-xs">Total del mes SIN ARRIENDO:</td>
+          <td class="py-2 px-4 text-right font-bold text-slate-800 dark:text-slate-100">{{ resumen()?.totalWithoutRent | pesoChileno }}</td>
+          <td [attr.colspan]="totalColumnas() - 4"></td>
+        </tr>
+        <tr class="bg-blue-100/70 dark:bg-blue-950/50 text-blue-950 dark:text-blue-200 font-extrabold text-sm sm:text-base border-t-2 border-blue-500">
+          <td colspan="3" class="py-3 px-4 text-right">TOTAL GENERAL MES (Con arriendo):</td>
+          <td class="py-3 px-4 text-right">{{ resumen()?.total | pesoChileno }}</td>
+          @for (total of totalesPorPersona(); track $index) {
+            <td class="py-3 px-4 text-right" [class]="colores($index).texto">{{ total?.total | pesoChileno }}</td>
+          }
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
