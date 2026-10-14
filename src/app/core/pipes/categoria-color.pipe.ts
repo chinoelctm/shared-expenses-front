@@ -11,6 +11,7 @@ const COLORES: Record<string, string> = {
   Food: 'bg-orange-100 text-orange-800 dark:bg-orange-900/60 dark:text-orange-300',
   Technology: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300',
   Health: 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300',
+  Cookie: 'bg-amber-200 text-amber-900 dark:bg-amber-800/60 dark:text-amber-200',
 };
 
 const COLOR_POR_DEFECTO = 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
