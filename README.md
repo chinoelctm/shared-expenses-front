@@ -1,11 +1,13 @@
 # shared-expenses.front
 
 Planilla de gastos compartidos con reparto proporcional al aporte de cada persona.
-Angular 17 (standalone) + Tailwind CSS + Chart.js. Consume la API de `shared-expenses.service`.
+Angular 17 (standalone) + Tailwind CSS + Chart.js. Consume la API de `shared-expenses.service` e inicia sesión
+con `shared-expenses-auth-service`.
 
 ## Ejecutar
 
-Requiere la API corriendo (por defecto en `http://localhost:5080`, ver `shared-expenses.service`).
+Requiere las dos APIs corriendo: `shared-expenses.service` en `http://localhost:5080` y
+`shared-expenses-auth-service` en `http://localhost:5090`.
 
 ```bash
 npm install
@@ -14,37 +16,55 @@ npm run build      # dist/shared-expenses/browser
 npm test
 ```
 
-La URL de la API depende del entorno:
+El front llama a las APIs **por su mismo origen** (`/api/...`), nunca a otro dominio: así las cookies de sesión
+son del propio sitio y no hace falta CORS. Quién reenvía cada ruta:
 
-| Archivo | Se usa en | URL |
+| Ruta | Desarrollo (`proxy.conf.json` de `ng serve`) | Producción (rewrites de `render.yaml`) |
 |---|---|---|
-| `src/environments/environment.development.ts` | `npm start` / `ng serve` | `http://localhost:5080/` |
-| `src/environments/environment.ts` | `npm run build` (producción) | `https://shared-expenses-service.onrender.com/` |
+| `/api/v1/auth/*` | `http://localhost:5090` | `https://shared-expenses-auth-service.onrender.com` |
+| `/api/*` (el resto) | `http://localhost:5080` | `https://shared-expenses-service.onrender.com` |
 
-La API debe tener el origen del front en `Cors:AllowedOrigins`.
+## Sesión
+
+- **Login** (`/login`): usuario y contraseña. Sin sesión, cualquier ruta lleva a `/login`; con sesión, `/login`
+  lleva a la planilla. Si la sesión expira se vuelve aquí con un aviso. Si el servidor de Render estaba dormido,
+  avisa que el primer ingreso puede tardar hasta un minuto.
+- **Cerrar sesión** (*Salir*, en el header): pide confirmación, revoca la sesión en la API y recarga en `/login`.
+
+`shared-expenses-auth-service` deja la sesión en dos cookies **HttpOnly**: `auth_token` (JWT, 15 min) y
+`refresh_token` (7 días, solo viaja a `/api/v1/auth`). El JavaScript del front nunca ve los tokens; solo sabe
+quién es el usuario por `GET /api/v1/auth/me` (`SesionStore`).
+
+- `sesionGuard` / `anonimoGuard` (`core/guards`): al abrir la app consultan `/me` una vez; si el access token
+  venció, renuevan con `/refresh` antes de decidir.
+- `authInterceptor`: si la API de gastos responde 401, renueva la sesión con `/refresh` y reintenta la llamada
+  una vez. Varias llamadas con 401 a la vez comparten un solo refresh. Si no se puede renovar (refresh vencido o
+  revocado), manda al login. Antes de rendirse consulta `/me`, por si otra pestaña acababa de rotar las cookies.
 
 ## Despliegue (Render, gratis)
 
 El repo incluye `render.yaml`: en Render, **New → Blueprint** y elegir este repo. Crea un Static Site
-que compila con `npm run build`, publica `dist/shared-expenses/browser` y redirige todas las rutas a
-`index.html`.
+que compila con `npm run build`, publica `dist/shared-expenses/browser` y define, en este orden, los rewrites
+`/api/v1/auth/*` → servicio de auth, `/api/*` → API de gastos y `/*` → `index.html`.
 
-Si Render asigna a la API una URL distinta de `shared-expenses-service.onrender.com` (por ejemplo, porque
-el nombre ya estaba tomado), actualiza `src/environments/environment.ts` y haz push.
+Si Render asigna a alguna API una URL distinta (por ejemplo, porque el nombre ya estaba tomado), actualiza su
+rewrite en `render.yaml` y haz push.
 
 ## Estructura
 
 ```
 src/app
 ├── core
-│   ├── http/          Un servicio por recurso de la API: people, categories, settings, months,
+│   ├── http/          Un servicio por recurso de la API: auth, people, categories, settings, months,
 │   │                  expenses, backup. Todos async con lastValueFrom.
-│   ├── interceptors/  authInterceptor (Bearer token)
+│   ├── guards/        sesionGuard y anonimoGuard (login)
+│   ├── interceptors/  authInterceptor (401 → refresh de la sesión → reintento)
 │   ├── interfaces/    requests/ y responses/ (contratos de la API) + tipos de UI
 │   ├── pipes/         pesoChileno, nombreMes, fechaCorta
-│   ├── state/         PlanillaStore: estado de la planilla (signals) y acciones
+│   ├── state/         PlanillaStore (planilla, signals y acciones) y SesionStore (login, refresh, logout)
 │   └── utils/         Errores de la API, vista previa de repartos, fechas, toast, confirmación, colores
 ├── modulos
+│   ├── login/             Pantalla de inicio de sesión
 │   └── planilla-gastos/   Página principal + componentes (KPIs, gráfico, tabla, modales)
 └── shared/            header, toast, confirm-dialog, categoria-badge (color de la API)
 ```
