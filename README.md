@@ -41,6 +41,12 @@ quién es el usuario por `GET /api/v1/auth/me` (`SesionStore`).
   una vez. Varias llamadas con 401 a la vez comparten un solo refresh. Si no se puede renovar (refresh vencido o
   revocado), manda al login. Antes de rendirse consulta `/me`, por si otra pestaña acababa de rotar las cookies.
 
+## Mover un gasto al próximo mes
+
+Al editar un gasto pendiente (no fijo ni arriendo) aparece *Mover al próximo mes*: pide confirmación y la API lo pasa
+al mes siguiente con "(Gasto mes anterior pendiente)" en el nombre. Si el formulario tiene cambios sin guardar, el
+botón queda desactivado hasta guardarlos o descartarlos (se mueve el gasto guardado).
+
 ## Despliegue (Render, gratis)
 
 El repo incluye `render.yaml`: en Render, **New → Blueprint** y elegir este repo. Crea un Static Site
