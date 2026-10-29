@@ -127,6 +127,24 @@
         </label>
       </div>
 
+      <!-- Solo al editar un gasto pendiente que no sea fijo: lo pasa al mes siguiente -->
+      @if (puedeMoverse) {
+        <div class="p-3 rounded-xl vidrio-sutil space-y-2">
+          <button type="button" (click)="moverAlProximoMes()" [disabled]="guardando || hayCambios"
+                  class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl boton-vidrio text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            Mover al próximo mes
+          </button>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">
+            @if (hayCambios) {
+              Guarda o descarta los cambios del formulario antes de moverlo.
+            } @else {
+              Se quita de {{ gastoOriginal?.month ?? store.mesSeleccionado() | nombreMes }} y pasa a {{ mesSiguiente | nombreMes }} con "(Gasto mes anterior pendiente)" en el nombre.
+            }
+          </p>
+        </div>
+      }
+
       <div class="pt-3 flex gap-2">
         <button type="button" (click)="store.cerrarModal()" class="flex-1 py-2.5 rounded-xl boton-vidrio text-sm ">Cancelar</button>
         <button type="submit" [disabled]="guardando" class="flex-1 py-2.5 rounded-xl boton-principal text-sm ">Guardar Gasto</button>

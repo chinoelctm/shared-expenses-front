@@ -36,3 +36,10 @@ export interface AddExpenseResponse {
     planId:  string | null;
     amounts: number[];
 }
+
+// Resultado de mover un gasto pendiente al mes siguiente
+export interface MoveExpenseResponse {
+    month:       string;
+    date:        string;
+    description: string;
+}

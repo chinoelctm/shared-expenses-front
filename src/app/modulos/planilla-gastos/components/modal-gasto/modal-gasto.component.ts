@@ -5,7 +5,9 @@ import { PlanillaStore } from '../../../../core/state/planilla.store';
 import { RepartoService } from '../../../../core/utils/reparto.service';
 import { FechaService } from '../../../../core/utils/fecha.service';
 import { ToastService } from '../../../../core/utils/toast.service';
+import { ConfirmService } from '../../../../core/utils/confirm.service';
 import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
+import { NombreMesPipe } from '../../../../core/pipes/nombre-mes.pipe';
 import { coloresPersona } from '../../../../core/utils/persona-colores';
 import { ExpenseResponse } from '../../../../core/interfaces/responses/ExpenseResponse';
 
@@ -15,7 +17,7 @@ const CUOTAS_POR_DEFECTO = 3;
 @Component({
   selector: 'app-modal-gasto',
   standalone: true,
-  imports: [FormsModule, PesoChilenoPipe],
+  imports: [FormsModule, PesoChilenoPipe, NombreMesPipe],
   templateUrl: './modal-gasto.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -25,6 +27,7 @@ export class ModalGastoComponent implements OnInit {
   private readonly _repartoService = inject(RepartoService);
   private readonly _fechaService = inject(FechaService);
   private readonly _toastService = inject(ToastService);
+  private readonly _confirmService = inject(ConfirmService);
   private readonly _pesoChileno = new PesoChilenoPipe();
 
   protected readonly cuotasRapidas: number[] = environment.ListaCuotasRapidas;
@@ -137,6 +140,49 @@ export class ModalGastoComponent implements OnInit {
       return `*Cuotas 1 a ${this.cuotasEfectivas - 1}: ${this._pesoChileno.transform(this.montoCuota)}. Última cuota: ${this._pesoChileno.transform(ultima)} por calce exacto.`;
     }
     return `*Cada mes se cargarán ${this._pesoChileno.transform(this.montoCuota)} distribuidos proporcionalmente.`;
+  }
+
+  // Mover al próximo mes: solo gastos ya guardados, pendientes y que no sean costos fijos (la API aplica la misma regla)
+  protected get puedeMoverse(): boolean {
+    const gasto = this.gastoOriginal;
+    return !!gasto && !gasto.paid && !gasto.isFixed && !gasto.isRent;
+  }
+
+  protected get mesSiguiente(): string {
+    return this._fechaService.desplazarMes(this.gastoOriginal?.month ?? this.store.mesSeleccionado(), 1);
+  }
+
+  // Se mueve el gasto guardado: si el formulario tiene cambios sin guardar, primero hay que resolverlos
+  protected get hayCambios(): boolean {
+    const gasto = this.gastoOriginal;
+    if (!gasto) return false;
+    return this.descripcion.trim() !== gasto.description
+      || this.montoTotal !== gasto.amount
+      || this.fecha !== gasto.date
+      || this.categoria !== gasto.category
+      || this.pagado !== gasto.paid
+      || (this.pagadoPor || null) !== gasto.paidBy;
+  }
+
+  protected async moverAlProximoMes() {
+    const gasto = this.gastoOriginal;
+    if (!gasto || !this.puedeMoverse || this.hayCambios) return;
+
+    const sufijo = '(Gasto mes anterior pendiente)';
+    const nombre = gasto.description.endsWith(sufijo) ? gasto.description : `${gasto.description} ${sufijo}`;
+    const respuesta = await this._confirmService.preguntar({
+      titulo: '¿Mover al próximo mes?',
+      mensaje: `Se quita de ${this._fechaService.nombreMes(gasto.month)} y pasa a ${this._fechaService.nombreMes(this.mesSiguiente)} como:\n"${nombre}"`,
+      opciones: [
+        { etiqueta: 'Cancelar', valor: 'no', estilo: 'secundario' },
+        { etiqueta: 'Mover al próximo mes', valor: 'si', estilo: 'primario' }
+      ]
+    });
+    if (respuesta !== 'si') return;
+
+    this.guardando = true;
+    await this.store.moverAlProximoMes(gasto);
+    this.guardando = false;
   }
 
   protected alternarCuotas(habilitadas: boolean) {

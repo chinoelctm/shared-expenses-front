@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { apiUrl } from './api';
-import { AddExpenseResponse, ExpenseResponse } from '../interfaces/responses/ExpenseResponse';
+import { AddExpenseResponse, ExpenseResponse, MoveExpenseResponse } from '../interfaces/responses/ExpenseResponse';
 import { DeleteScope, ExpenseRequest } from '../interfaces/requests/ExpenseRequest';
 
 @Injectable({
@@ -27,6 +27,11 @@ export class ExpensesService {
 
   async cambiarEstadoPago(id: string, paid: boolean): Promise<void> {
     await lastValueFrom(this._http.patch<void>(`${apiUrl}/expenses/${id}/payment`, { paid }));
+  }
+
+  // Solo gastos pendientes: la API corre la fecha un mes y agrega "(Gasto mes anterior pendiente)" a la descripción
+  async moverAlProximoMes(id: string): Promise<MoveExpenseResponse> {
+    return lastValueFrom(this._http.post<MoveExpenseResponse>(`${apiUrl}/expenses/${id}/move-to-next-month`, null));
   }
 
   async eliminarGasto(id: string, scope: DeleteScope = 'Single'): Promise<void> {

@@ -246,6 +246,15 @@ export class PlanillaStore {
     this._toastService.mostrar(alcance === 'Plan' ? 'Se eliminaron las cuotas del plan' : 'Gasto eliminado', '🗑️');
   }
 
+  /** Pasa un gasto pendiente al mes siguiente; se queda en el mes que se está viendo (el gasto sale de la lista). */
+  async moverAlProximoMes(gasto: ExpenseResponse) {
+    const resp = await this.ejecutar(() => this._expensesService.moverAlProximoMes(gasto.id));
+    if (!resp) return;
+
+    await this.recargarTrasGuardar();
+    this._toastService.mostrar(`"${gasto.description}" se movió a ${this._fechaService.nombreMes(resp.valor.month)}`, '📆');
+  }
+
   async guardarGasto(id: string | null, request: ExpenseRequest): Promise<boolean> {
     if (id) {
       const resp = await this.ejecutar(() => this._expensesService.actualizarGasto(id, request));
