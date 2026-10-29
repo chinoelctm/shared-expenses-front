@@ -1,12 +1,14 @@
 <div class="m-auto w-full max-w-sm px-4 py-10">
-  <div class="flex flex-col items-center gap-3 mb-6">
-    <span class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-blue-500/20">GC</span>
-    <h1 class="font-bold text-2xl tracking-tight text-slate-900 dark:text-white">Gastos Compartidos</h1>
+  <div class="entrada flex flex-col items-center gap-3 mb-6" style="--i: 0">
+    <span class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30" aria-hidden="true">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+    </span>
+    <h1 class="font-bold text-2xl tracking-tight text-slate-900 dark:text-white">Gastos<span class="text-indigo-600 dark:text-indigo-400"> Compartidos</span></h1>
     <p class="text-sm text-slate-500 dark:text-slate-400">Inicia sesión para ver la planilla</p>
   </div>
 
   <form (submit)="entrar($event, usuario.value, clave.value)" novalidate
-        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm p-6 flex flex-col gap-4">
+        class="vidrio-fuerte entrada rounded-3xl p-6 flex flex-col gap-4" style="--i: 1">
     @if (expirada && !error()) {
       <p class="flex items-start gap-2 text-sm rounded-xl px-3 py-2 bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900" role="status">
         <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -20,7 +22,7 @@
         <svg class="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
         <input #usuario id="usuario" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required
                [disabled]="enviando()" (input)="error.set(null)"
-               class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-60">
+               class="w-full pl-9 pr-3 py-2.5 rounded-xl campo text-sm disabled:opacity-60">
       </div>
     </div>
 
@@ -30,7 +32,7 @@
         <svg class="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         <input #clave id="clave" name="password" [type]="mostrarClave() ? 'text' : 'password'" autocomplete="current-password" required
                [disabled]="enviando()" (input)="error.set(null)"
-               class="w-full pl-9 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-60">
+               class="w-full pl-9 pr-11 py-2.5 rounded-xl campo text-sm disabled:opacity-60">
         <button type="button" (click)="mostrarClave.set(!mostrarClave())" class="absolute right-1 flex items-center justify-center w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 [attr.aria-pressed]="mostrarClave()" [title]="mostrarClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
           @if (mostrarClave()) {
@@ -50,7 +52,7 @@
     }
 
     <button type="submit" [disabled]="enviando()"
-            class="flex items-center justify-center gap-2 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold text-sm shadow-md shadow-blue-500/20 transition">
+            class="flex items-center justify-center gap-2 h-11 rounded-xl boton-principal text-sm">
       @if (enviando()) {
         <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         <span>Ingresando…</span>

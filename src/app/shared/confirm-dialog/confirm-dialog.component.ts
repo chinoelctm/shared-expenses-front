@@ -3,9 +3,9 @@ import { ConfirmService } from '../../core/utils/confirm.service';
 import { EstiloOpcion } from '../../core/interfaces/Confirmacion';
 
 const ESTILOS: Record<EstiloOpcion, string> = {
-  primario: 'bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/20',
+  primario: 'boton-principal',
   peligro: 'bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-md shadow-rose-500/20',
-  secundario: 'border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700',
+  secundario: 'boton-vidrio',
 };
 
 @Component({

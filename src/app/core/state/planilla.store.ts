@@ -7,6 +7,7 @@ import { MonthsService } from '../http/months.service';
 import { ExpensesService } from '../http/expenses.service';
 import { BackupService } from '../http/backup.service';
 import { FechaService } from '../utils/fecha.service';
+import { gastosPorDia } from '../utils/actividad';
 import { RepartoService } from '../utils/reparto.service';
 import { ToastService } from '../utils/toast.service';
 import { mensajeDeError } from '../utils/api-error';
@@ -94,6 +95,14 @@ export class PlanillaStore {
   });
   readonly gastosFijos = computed(() => this.gastosFiltrados().filter(g => g.isFixed));
   readonly gastosVariables = computed(() => this.gastosFiltrados().filter(g => !g.isFixed));
+
+  // Presentación: gastos variables del mes por día (los fijos y el arriendo no tienen un día de compra real)
+  readonly gastosVariablesPorDia = computed(() =>
+    gastosPorDia(this.gastos().filter(g => !g.isFixed), this.mesSeleccionado(), this._fechaService.fechaHoy()));
+
+  // Los últimos gastos variables del mes según su fecha (la API no guarda la hora de registro)
+  readonly ultimosGastos = computed(() =>
+    this.gastos().filter(g => !g.isFixed).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5));
 
   /** Parte de cada persona en un gasto (monto y si está saldada), en el mismo orden que personas(). */
   partesPorPersona(gasto: ExpenseResponse): (PersonAmount | null)[] {

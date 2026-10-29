@@ -62,11 +62,11 @@ src/app
 │   ├── interfaces/    requests/ y responses/ (contratos de la API) + tipos de UI
 │   ├── pipes/         pesoChileno, nombreMes, fechaCorta
 │   ├── state/         PlanillaStore (planilla, signals y acciones) y SesionStore (login, refresh, logout)
-│   └── utils/         Errores de la API, vista previa de repartos, fechas, toast, confirmación, colores
+│   └── utils/         Errores de la API, vista previa de repartos, gasto por día, fechas, toast, confirmación, colores
 ├── modulos
 │   ├── login/             Pantalla de inicio de sesión
-│   └── planilla-gastos/   Página principal + componentes (KPIs, gráfico, tabla, modales)
-└── shared/            header, toast, confirm-dialog, categoria-badge (color de la API)
+│   └── planilla-gastos/   Página principal + componentes (KPIs, gasto por día, categorías, tabla, modales)
+└── shared/            header, toast, confirm-dialog, categoria-badge (color de la API), minigrafico
 ```
 
 ## Qué calcula cada lado
@@ -79,3 +79,14 @@ La planilla soporta cualquier cantidad de personas: hay una tarjeta y una column
 Las personas se gestionan en Configuración (agregar, cambiar nombre/aporte, quitar).
 
 Los errores de la API (ProblemDetails) se muestran en el toast con el primer mensaje de validación.
+
+## Diseño
+
+Vidrio esmerilado sobre un fondo degradado propio (`body.fondo-app` en `styles.scss`), claro u oscuro según el tema
+del sistema. Clases reutilizables: `vidrio` (tarjetas), `vidrio-fuerte` (barra superior, modales, toast),
+`vidrio-sutil` (filas y chips), `boton-principal` (degradado índigo → violeta) y `boton-vidrio`. La tabla de gastos y
+los campos de los formularios quedan sólidos para leerlos bien.
+
+Animaciones solo con CSS: `entrada` (aparece en cascada según `--i`), `levantar` (hover), `crecer` y `crecer-ancho`
+(barras) y `dibujar` (línea del minigráfico). Se apagan con "reducir movimiento". En el teléfono el desenfoque baja
+a 10 px y todo control táctil mide al menos 44 px.

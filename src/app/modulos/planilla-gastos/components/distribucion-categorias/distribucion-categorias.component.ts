@@ -55,9 +55,11 @@ export class DistribucionCategoriasComponent implements AfterViewInit, OnDestroy
         labels: hayDatos ? categorias.map(c => c.nombre) : ['Sin gastos'],
         datasets: [{
           data: hayDatos ? categorias.map(c => c.monto) : [1],
-          backgroundColor: hayDatos ? categorias.map(c => c.color) : ['#cbd5e1'],
+          backgroundColor: hayDatos ? categorias.map(c => c.color) : [modoOscuro ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.10)'],
           borderWidth: 2,
-          borderColor: modoOscuro ? '#1e293b' : '#ffffff'
+          // Separación translúcida entre porciones: se funde con el vidrio de la tarjeta
+          borderColor: modoOscuro ? 'rgba(15,23,42,0.55)' : 'rgba(255,255,255,0.75)',
+          borderRadius: 4
         }]
       },
       options: {

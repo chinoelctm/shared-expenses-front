@@ -1,39 +1,40 @@
-<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-  <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/80">
+<section class="vidrio rounded-2xl overflow-hidden" aria-labelledby="titulo-planilla">
+  <div class="px-4 sm:px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
     <div>
-      <h2 class="text-base font-bold text-slate-900 dark:text-white">Planilla de Gastos</h2>
+      <h2 id="titulo-planilla" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Planilla de gastos</h2>
       <p class="text-xs text-slate-500 dark:text-slate-400">Costos fijos recurrentes y gastos variables (incluyendo cuotas mensuales)</p>
     </div>
     <div class="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
-      <button type="button" (click)="store.abrirModalArriendo()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-100 transition-colors">
-        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-        Editar Arriendo del Mes
+      <button type="button" (click)="store.abrirModalArriendo()" class="boton-vidrio inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        Editar arriendo
       </button>
-      <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-0.5 text-xs font-medium">
+      <div class="inline-flex rounded-xl vidrio-sutil p-0.5 text-xs font-medium" role="group" aria-label="Filtrar gastos">
         @for (filtro of filtros; track filtro.valor) {
-          <button type="button" (click)="store.filtro.set(filtro.valor)"
-                  class="px-3 py-1 rounded-md"
-                  [class]="store.filtro() === filtro.valor ? 'bg-blue-600 text-white font-semibold' : 'text-slate-600 dark:text-slate-300 hover:text-blue-600'">
+          <button type="button" (click)="store.filtro.set(filtro.valor)" [attr.aria-pressed]="store.filtro() === filtro.valor"
+                  class="px-3 h-8 rounded-lg transition"
+                  [class]="store.filtro() === filtro.valor ? 'bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold shadow-md shadow-indigo-500/25' : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-white/10'">
             {{ filtro.etiqueta }}
           </button>
         }
       </div>
-      <button type="button" (click)="store.abrirModalNuevoGasto()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
+      <button type="button" (click)="store.abrirModalNuevoGasto()" class="boton-principal inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        Nuevo Gasto
+        Nuevo gasto
       </button>
     </div>
   </div>
-  <div class="overflow-x-auto" [class.opacity-60]="store.cargando()">
+  <!-- La tabla es densa: queda sólida (sobre vidrio cansa la vista) -->
+  <div class="overflow-x-auto bg-white dark:bg-slate-900 border-t border-white/70 dark:border-white/10 transition-opacity" [class.opacity-60]="store.cargando()">
     <table class="w-full text-left text-sm border-collapse">
       <thead>
-        <tr class="bg-blue-600 text-white font-semibold text-xs uppercase tracking-wider">
+        <tr class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs uppercase tracking-wider">
           <th class="py-3 px-4">Descripción</th>
           <th class="py-3 px-3">Categoría</th>
           <th class="py-3 px-3 text-center">Fecha</th>
           <th class="py-3 px-4 text-right">Monto Total</th>
           @for (persona of store.personas(); track persona.id; let par = $even) {
-            <th class="py-3 px-4 text-right whitespace-nowrap" [class]="par ? 'bg-blue-700/80' : 'bg-blue-800/80'">
+            <th class="py-3 px-4 text-right whitespace-nowrap" [class]="par ? 'bg-black/10' : 'bg-black/20'">
               {{ persona.name }} ({{ persona.percentage }}%)
             </th>
           }
@@ -48,10 +49,10 @@
           </tr>
         } @else {
           @if (store.gastosFijos().length > 0) {
-            <tr class="bg-blue-50/70 dark:bg-slate-800/90 border-y border-blue-200 dark:border-slate-700">
-              <td [attr.colspan]="totalColumnas()" class="py-2.5 px-4 text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider">
+            <tr class="bg-indigo-50/70 dark:bg-slate-800/90 border-y border-indigo-200 dark:border-slate-700">
+              <td [attr.colspan]="totalColumnas()" class="py-2.5 px-4 text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider">
                 <div class="flex items-center justify-between">
-                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Costos Fijos Mensuales (Arriendo &amp; Servicios)</span>
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Costos Fijos Mensuales (Arriendo &amp; Servicios)</span>
                   <button type="button" (click)="store.abrirModalArriendo()" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 normal-case">
                     Editar Arriendo del Mes
                   </button>
@@ -105,7 +106,7 @@
           <td class="py-2 px-4 text-right font-bold text-slate-800 dark:text-slate-100">{{ resumen()?.totalWithoutRent | pesoChileno }}</td>
           <td [attr.colspan]="totalColumnas() - 4"></td>
         </tr>
-        <tr class="bg-blue-100/70 dark:bg-blue-950/50 text-blue-950 dark:text-blue-200 font-extrabold text-sm sm:text-base border-t-2 border-blue-500">
+        <tr class="bg-indigo-100/70 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 font-extrabold text-sm sm:text-base border-t-2 border-indigo-500">
           <td colspan="3" class="py-3 px-4 text-right">TOTAL GENERAL MES (Con arriendo):</td>
           <td class="py-3 px-4 text-right">{{ resumen()?.total | pesoChileno }}</td>
           @for (total of totalesPorPersona(); track $index) {
@@ -116,4 +117,4 @@
       </tfoot>
     </table>
   </div>
-</div>
+</section>

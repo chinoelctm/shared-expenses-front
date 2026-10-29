@@ -1,58 +1,72 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-  <!-- Total Mes -->
-  <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-      <span class="text-xs font-semibold uppercase tracking-wider">Total General Mes</span>
-      <button type="button" (click)="store.abrirModalArriendo()" class="group flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 font-medium">
-        <span>Con Arriendo</span>
-        <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+  <!-- Total del mes: el minigráfico acumula los gastos variables día a día -->
+  <div class="vidrio levantar entrada rounded-2xl p-4 sm:p-5 flex flex-col gap-3" style="--i: 1">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total general mes</span>
+      <span class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center" aria-hidden="true">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+      </span>
+    </div>
+    <div class="flex items-end justify-between gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums">{{ resumen()?.total | pesoChileno }}</span>
+      <app-minigrafico [valores]="serieAcumulada()" class="w-20 h-8 shrink-0 text-indigo-500 dark:text-indigo-400" title="Gastos variables acumulados día a día en el mes" />
+    </div>
+    <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <span>Sin arriendo: <strong class="text-slate-700 dark:text-slate-200 tabular-nums">{{ resumen()?.totalWithoutRent | pesoChileno }}</strong></span>
+      <button type="button" (click)="store.abrirModalArriendo()" class="inline-flex items-center gap-1 rounded-lg text-indigo-600 dark:text-indigo-300 font-semibold hover:underline" title="Editar arriendo del mes">
+        Arriendo <span class="tabular-nums">{{ resumen()?.rent | pesoChileno }}</span>
       </button>
     </div>
-    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ resumen()?.total | pesoChileno }}</div>
-    <div class="mt-2 text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-0.5 sm:flex-row sm:justify-between">
-      <span>Sin arriendo: <strong class="text-slate-700 dark:text-slate-200">{{ resumen()?.totalWithoutRent | pesoChileno }}</strong></span>
-      <span>Arriendo mes: <button type="button" (click)="store.abrirModalArriendo()" class="text-blue-600 dark:text-blue-400 underline font-semibold">{{ resumen()?.rent | pesoChileno }}</button></span>
-    </div>
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
   </div>
 
-  <!-- Una tarjeta por persona -->
+  <!-- Una tarjeta por persona: la barra es la parte que ya pagó de su total -->
   @for (persona of resumen()?.people ?? []; track persona.personId; let i = $index) {
-    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-      <div class="flex items-center justify-between mb-1">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full" [class]="colores(i).punto"></span>
-          <span class="text-sm font-bold text-slate-900 dark:text-white">{{ persona.name }}</span>
-        </div>
-        <span class="text-xs font-bold px-2 py-0.5 rounded-md" [class]="colores(i).badge" [title]="'Aporta ' + (persona.contribution | pesoChileno)">{{ persona.percentage }}%</span>
+    <div class="vidrio levantar entrada rounded-2xl p-4 sm:p-5 flex flex-col gap-3" [style.--i]="2 + i">
+      <div class="flex items-center justify-between gap-2">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-sm font-bold" [class]="colores(i).badge" aria-hidden="true">{{ persona.name.charAt(0) }}</span>
+          <span class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ persona.name }}</span>
+        </span>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full" [class]="colores(i).badge" [title]="'Aporta ' + (persona.contribution | pesoChileno)">{{ persona.percentage }}%</span>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold" [class]="colores(i).texto">{{ persona.total | pesoChileno }}</div>
-      <div class="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>Pagado: <span class="font-semibold text-emerald-600 dark:text-emerald-400">{{ persona.paid | pesoChileno }}</span></span>
-        <span>Pendiente: <span class="font-semibold text-amber-600 dark:text-amber-400">{{ persona.pending | pesoChileno }}</span></span>
+      <div class="text-2xl sm:text-3xl font-extrabold tabular-nums" [class]="colores(i).texto">{{ persona.total | pesoChileno }}</div>
+      <div class="space-y-1.5">
+        <div class="h-1.5 rounded-full bg-slate-900/10 dark:bg-white/10 overflow-hidden" aria-hidden="true">
+          <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 crecer-ancho" [style.width.%]="porcentajePagado(persona.paid, persona.total)"></div>
+        </div>
+        <div class="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span>Pagado <strong class="text-emerald-600 dark:text-emerald-400 tabular-nums">{{ persona.paid | pesoChileno }}</strong></span>
+          <span>Pendiente <strong class="text-amber-600 dark:text-amber-400 tabular-nums">{{ persona.pending | pesoChileno }}</strong></span>
+        </div>
       </div>
     </div>
   } @empty {
-    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-dashed border-slate-300 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400 flex flex-col justify-center gap-2 sm:col-span-2">
+    <div class="vidrio entrada rounded-2xl p-5 text-xs text-slate-500 dark:text-slate-400 flex flex-col justify-center gap-2 sm:col-span-2" style="--i: 2">
       <span>No hay personas registradas para repartir los gastos.</span>
-      <button type="button" (click)="store.abrirModalConfiguracion()" class="self-start text-blue-600 dark:text-blue-400 font-semibold hover:underline">Agregar personas</button>
+      <button type="button" (click)="store.abrirModalConfiguracion()" class="self-start rounded-lg text-indigo-600 dark:text-indigo-300 font-semibold hover:underline">Agregar personas</button>
     </div>
   }
 
-  <!-- Estado de Pagos -->
-  <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-    <div>
-      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-        <span class="text-xs font-semibold uppercase tracking-wider">Estado de Pagos</span>
-        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ resumen()?.payments?.progress ?? 0 }}%</span>
-      </div>
-      <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden mt-2">
-        <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" [style.width.%]="resumen()?.payments?.progress ?? 0"></div>
-      </div>
+  <!-- Estado de pagos -->
+  <div class="vidrio levantar entrada rounded-2xl p-4 sm:p-5 flex flex-col gap-3" [style.--i]="2 + (resumen()?.people?.length ?? 1)">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Estado de pagos</span>
+      <span class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center justify-center" aria-hidden="true">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </span>
     </div>
-    <div class="mt-3 flex items-center justify-between text-xs font-medium">
-      <span class="text-emerald-600 dark:text-emerald-400">Pagado: <strong>{{ resumen()?.payments?.paid | pesoChileno }}</strong></span>
-      <span class="text-amber-600 dark:text-amber-400">Pendiente: <strong>{{ resumen()?.payments?.pending | pesoChileno }}</strong></span>
+    <div class="flex items-baseline justify-between gap-2">
+      <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">{{ resumen()?.payments?.progress ?? 0 }}%</span>
+      <span class="text-xs text-slate-500 dark:text-slate-400">pagado</span>
+    </div>
+    <div class="space-y-1.5">
+      <div class="h-2 rounded-full bg-slate-900/10 dark:bg-white/10 overflow-hidden" aria-hidden="true">
+        <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 crecer-ancho" [style.width.%]="resumen()?.payments?.progress ?? 0"></div>
+      </div>
+      <div class="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <span>Pagado <strong class="text-emerald-600 dark:text-emerald-400 tabular-nums">{{ resumen()?.payments?.paid | pesoChileno }}</strong></span>
+        <span>Pendiente <strong class="text-amber-600 dark:text-amber-400 tabular-nums">{{ resumen()?.payments?.pending | pesoChileno }}</strong></span>
+      </div>
     </div>
   </div>
 </div>

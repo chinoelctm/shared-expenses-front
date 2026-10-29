@@ -1,49 +1,51 @@
-<div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
-  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-700/80">
+<section class="vidrio rounded-2xl p-4 sm:p-6" aria-labelledby="titulo-categorias">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
     <div>
-      <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
-        Distribución de Gastos por Categoría
+      <h3 id="titulo-categorias" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <span class="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-300 flex items-center justify-center" aria-hidden="true">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+        </span>
+        Distribución por categoría
       </h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Desglose porcentual y montos totales distribuidos en el mes</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Desglose porcentual y montos totales del mes</p>
     </div>
-    <div class="flex items-center gap-3 text-xs">
-      <span class="text-slate-500 dark:text-slate-400">Categorías activas: <strong class="text-slate-900 dark:text-white">{{ categorias().length }}</strong></span>
-    </div>
+    <span class="text-[11px] font-medium px-2.5 py-1 rounded-full vidrio-sutil text-slate-600 dark:text-slate-300">
+      {{ categorias().length }} {{ categorias().length === 1 ? 'categoría' : 'categorías' }} con gastos
+    </span>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
     <div class="lg:col-span-5 flex flex-col items-center justify-center">
-      <div class="relative w-full max-w-[280px] h-[280px] flex items-center justify-center">
-        <canvas #grafico></canvas>
+      <div class="relative w-full max-w-[260px] h-[260px] flex items-center justify-center">
+        <canvas #grafico aria-label="Gráfico de dona con el gasto por categoría" role="img"></canvas>
         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Mes</span>
-          <span class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">{{ store.resumen()?.total | pesoChileno }}</span>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total mes</span>
+          <span class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight tabular-nums">{{ store.resumen()?.total | pesoChileno }}</span>
         </div>
       </div>
     </div>
     <div class="lg:col-span-7">
-      <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Detalle por Categoría</div>
-      <div class="space-y-2.5 max-h-[290px] overflow-y-auto pr-1">
-        @for (categoria of categorias(); track categoria.nombre) {
-          <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/80 hover:bg-slate-100/70 transition-colors">
-            <div class="flex items-center justify-between text-xs mb-1">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full flex-shrink-0" [style.background-color]="categoria.color"></span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">{{ categoria.nombre }}</span>
-              </div>
-              <div class="flex items-center gap-2 font-mono">
+      <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1 -mr-1">
+        @for (categoria of categorias(); track categoria.nombre; let i = $index) {
+          <div class="vidrio-sutil entrada block p-2.5 rounded-xl" [style.--i]="i"
+               [style.background-image]="'linear-gradient(90deg, ' + categoria.color + '26, transparent 75%)'">
+            <div class="flex items-center justify-between gap-2 text-xs mb-1.5">
+              <span class="flex items-center gap-2 min-w-0">
+                <span class="w-3 h-3 rounded-full shrink-0" [style.background-color]="categoria.color"></span>
+                <span class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ categoria.nombre }}</span>
+              </span>
+              <span class="flex items-center gap-2 shrink-0 tabular-nums">
                 <span class="font-bold text-slate-900 dark:text-white">{{ categoria.monto | pesoChileno }}</span>
-                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">{{ categoria.porcentaje.toFixed(1) }}%</span>
-              </div>
+                <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-white/60 dark:bg-white/10 px-1.5 py-0.5 rounded-md">{{ categoria.porcentaje.toFixed(1) }}%</span>
+              </span>
             </div>
-            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-300" [style.width.%]="categoria.porcentaje" [style.background-color]="categoria.color"></div>
+            <div class="w-full bg-slate-900/10 dark:bg-white/10 rounded-full h-1.5 overflow-hidden" aria-hidden="true">
+              <div class="h-full rounded-full crecer-ancho" [style.width.%]="categoria.porcentaje" [style.background-color]="categoria.color"></div>
             </div>
           </div>
         } @empty {
-          <div class="text-sm text-slate-400 py-6 text-center">No hay gastos para categorizar este mes.</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400 py-6 text-center">No hay gastos para categorizar este mes.</div>
         }
       </div>
     </div>
   </div>
-</div>
+</section>

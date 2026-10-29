@@ -18,8 +18,9 @@ export class HeaderComponent {
   protected readonly sesion = inject(SesionStore);
   private readonly _confirmService = inject(ConfirmService);
 
+  // Iniciales del usuario de la sesión para el avatar ("Joaquín Márquez" → "JM")
   protected readonly iniciales = computed(() =>
-    this.store.personas().slice(0, 3).map(p => p.name.charAt(0)).join('').toUpperCase() || 'GC'
+    (this.sesion.usuario()?.name ?? '').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p.charAt(0)).join('').toUpperCase() || 'GC'
   );
 
   protected async cerrarSesion() {
