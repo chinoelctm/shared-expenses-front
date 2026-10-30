@@ -189,9 +189,15 @@ body.fondo-app {
   }
 
   .fila-acordeon > * {
-    flex: 1 1 0;
     min-width: 0;
     transition: flex-grow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  // Mismo ancho de partida solo en la fila horizontal; apiladas (teléfono) cada una mide lo que su contenido
+  @media (min-width: 1024px) {
+    .fila-acordeon > * {
+      flex: 1 1 0;
+    }
   }
 
   // Solo con mouse: en pantallas táctiles el "hover" queda pegado tras tocar

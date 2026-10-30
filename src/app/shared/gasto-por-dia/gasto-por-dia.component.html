@@ -11,13 +11,17 @@
       </span>
     }
   </div>
-  <div class="flex-1 min-h-[170px] flex items-end gap-0.5 sm:gap-1" role="img" [attr.aria-label]="'Gasto por día del mes. Total: ' + (totalDias() | pesoChileno)">
+  <!-- Alto fijo y barras con posición absoluta: el % de alto se calcula sobre una caja con alto real (Safari en iPhone
+       no resuelve % de alto dentro de cajas flexibles sin alto definido y las barras quedaban en 0) -->
+  <div class="h-44 mt-auto flex items-end gap-0.5 sm:gap-1" role="img" [attr.aria-label]="'Gasto por día del mes. Total: ' + (totalDias() | pesoChileno)">
     @for (dia of dias(); track dia.fecha; let i = $index) {
-      <div class="flex-1 h-full flex flex-col items-center justify-end gap-1 min-w-0" [title]="(dia.fecha | fechaCorta) + ': ' + (dia.monto | pesoChileno)">
-        <div class="crecer w-full max-w-[22px] rounded-md sm:rounded-lg"
-             [style.--i]="i"
-             [style.height.%]="dia.monto ? 6 + (dia.monto / maximo()) * 84 : 3"
-             [class]="dia.esHoy ? 'bg-gradient-to-t from-indigo-500 to-sky-400 shadow-lg shadow-indigo-500/40' : dia.monto ? 'bg-indigo-400/60 dark:bg-indigo-300/45' : 'bg-slate-900/10 dark:bg-white/10'"></div>
+      <div class="flex-1 h-full flex flex-col items-center gap-1 min-w-0" [title]="(dia.fecha | fechaCorta) + ': ' + (dia.monto | pesoChileno)">
+        <div class="relative w-full flex-1">
+          <div class="crecer absolute bottom-0 inset-x-0 mx-auto max-w-[22px] rounded-md sm:rounded-lg"
+               [style.--i]="i"
+               [style.height.%]="dia.monto ? 6 + (dia.monto / maximo()) * 84 : 3"
+               [class]="dia.esHoy ? 'bg-gradient-to-t from-indigo-500 to-sky-400 shadow-lg shadow-indigo-500/40' : dia.monto ? 'bg-indigo-400/60 dark:bg-indigo-300/45' : 'bg-slate-900/10 dark:bg-white/10'"></div>
+        </div>
         <span class="text-[10px] tabular-nums leading-none h-3" [class]="dia.esHoy ? 'font-bold text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'">
           {{ etiqueta(dia) }}
         </span>
