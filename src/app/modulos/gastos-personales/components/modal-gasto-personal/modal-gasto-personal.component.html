@@ -1,0 +1,76 @@
+<div class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-personal">
+  <div class="vidrio-fuerte rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto entrada">
+    <div class="sticky top-0 z-10 px-6 py-4 bg-gradient-to-r from-indigo-500 to-violet-500 text-white flex items-center justify-between">
+      <h3 id="titulo-modal-personal" class="font-bold text-base">{{ gastoOriginal ? 'Editar gasto personal' : 'Nuevo gasto personal' }}</h3>
+      <button type="button" (click)="store.cerrarModal()" class="text-white/80 hover:text-white p-1 rounded-lg" title="Cerrar" aria-label="Cerrar">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <form (ngSubmit)="guardar()" class="p-6 space-y-4">
+      <div>
+        <label for="personalDesc" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Descripción</label>
+        <input type="text" id="personalDesc" name="descripcion" [(ngModel)]="descripcion" required maxlength="120" placeholder="Ej: Almuerzo, Zapatillas..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+
+      <div>
+        <label for="personalMonto" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+          {{ esCuotaExistente ? 'Monto de esta cuota (CLP)' : 'Monto total (CLP)' }}
+        </label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold">$</span>
+          <input type="number" id="personalMonto" name="monto" [(ngModel)]="monto" step="1" min="1" required placeholder="Ej: 15000" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold text-base focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+      </div>
+
+      @if (!gastoOriginal) {
+        <div class="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="personalCuotas" name="cuotasHabilitadas" [ngModel]="cuotasHabilitadas" (ngModelChange)="alternarCuotas($event)" class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500">
+              <label for="personalCuotas" class="text-xs font-bold text-indigo-950 dark:text-indigo-200 cursor-pointer">Pagar en cuotas</label>
+            </div>
+            @if (cuotasEfectivas > 1) {
+              <span class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">{{ cuotasEfectivas }} cuotas de {{ montoCuota | pesoChileno }}</span>
+            }
+          </div>
+          @if (cuotasHabilitadas) {
+            <div class="flex items-center gap-2 flex-wrap pt-1 border-t border-indigo-100 dark:border-indigo-900/60">
+              <label for="personalCuotasCount" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Número de cuotas:</label>
+              <input type="number" id="personalCuotasCount" name="cuotas" [(ngModel)]="cuotas" min="1" max="48" class="w-20 px-2.5 py-1.5 text-center font-bold text-sm rounded-lg border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+              @for (n of cuotasRapidas; track n) {
+                <button type="button" (click)="cuotas = n" class="px-2 py-1 rounded-lg boton-vidrio text-[11px]">{{ n }}</button>
+              }
+            </div>
+          }
+        </div>
+      } @else if (esCuotaExistente) {
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+          Cuota {{ gastoOriginal.installment?.number }} de {{ gastoOriginal.installment?.total }}: los cambios aplican solo a esta cuota.
+        </p>
+      }
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="personalFecha" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Fecha</label>
+          <input type="date" id="personalFecha" name="fecha" [(ngModel)]="fecha" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label for="personalCategoria" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Categoría</label>
+          <select id="personalCategoria" name="categoria" [(ngModel)]="categoria" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+            @for (opcion of store.categorias(); track opcion.id) {
+              <option [value]="opcion.id">{{ opcion.name }}</option>
+            }
+            @if (categoriaEliminada; as eliminada) {
+              <option [value]="eliminada.id">{{ eliminada.nombre }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="pt-3 flex gap-2">
+        <button type="button" (click)="store.cerrarModal()" class="flex-1 py-2.5 rounded-xl boton-vidrio text-sm">Cancelar</button>
+        <button type="submit" [disabled]="guardando" class="flex-1 py-2.5 rounded-xl boton-principal text-sm">Guardar Gasto</button>
+      </div>
+    </form>
+  </div>
+</div>

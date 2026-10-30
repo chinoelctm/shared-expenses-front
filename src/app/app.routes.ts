@@ -10,8 +10,15 @@ export const routes: Routes = [
 
     {
         path: '',
+        pathMatch: 'full',
         canActivate: [sesionGuard],
         loadComponent: () => import('./modulos/planilla-gastos/planilla-gastos.component').then((c) => c.PlanillaGastosComponent),
+    },
+
+    {
+        path: 'personales',
+        canActivate: [sesionGuard],
+        loadComponent: () => import('./modulos/gastos-personales/gastos-personales.component').then((c) => c.GastosPersonalesComponent),
     },
 
     {

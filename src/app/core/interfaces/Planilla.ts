@@ -9,3 +9,15 @@ export interface CategoriaResumen {
     porcentaje: number;
     color:      string;
 }
+
+// Gasto en la línea de tiempo de "Últimos gastos" (compartido o personal)
+export interface GastoReciente {
+    id:            string;
+    description:   string;
+    amount:        number;
+    date:          string;
+    categoryName:  string;
+    categoryColor: string;
+    installment:   { number: number; total: number } | null;
+    paidByName?:   string | null;
+}

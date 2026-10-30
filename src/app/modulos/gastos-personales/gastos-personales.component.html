@@ -1,0 +1,41 @@
+<main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-4 sm:space-y-5">
+  <!-- Encabezado y acciones -->
+  <div class="entrada flex flex-col md:flex-row md:items-end md:justify-between gap-3" style="--i: 0">
+    <div>
+      <p class="text-xs font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider">{{ store.mesSeleccionado() | nombreMes }}</p>
+      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">Mis gastos personales</h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Solo tuyos: no se reparten con nadie y siempre son gastos variables (sin arriendo ni costos fijos).</p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <button type="button" (click)="store.abrirModalNuevoGasto()" class="boton-principal flex items-center justify-center gap-2 h-11 px-4 rounded-xl text-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+        <span>Nuevo Gasto</span>
+      </button>
+      <button type="button" (click)="store.abrirModalPresupuesto()" class="vidrio levantar flex items-center justify-center gap-2 h-11 px-3.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200" title="Cuánto quieres gastar al mes">
+        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        <span class="hidden sm:inline">Presupuesto</span>
+      </button>
+    </div>
+  </div>
+
+  <app-aviso-presupuesto class="block entrada" style="--i: 1" />
+  <app-actividad-mes [dias]="store.gastosPorDia()" [ultimos]="store.ultimosGastos()" [indice]="2"
+                     subtitulo="Tus gastos y cuotas según su fecha"
+                     (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
+  <app-distribucion-categorias class="block entrada" style="--i: 5" [resumen]="store.resumen()?.categories ?? []" [total]="store.resumen()?.total" />
+  <app-tabla-personal class="block entrada" style="--i: 6" />
+</main>
+
+<!-- Botón flotante (+) -->
+<button type="button" (click)="store.abrirModalNuevoGasto()" class="boton-principal fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full active:scale-95 flex items-center justify-center" title="Agregar gasto personal" aria-label="Agregar gasto personal">
+  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+</button>
+
+@switch (store.modalAbierto()) {
+  @case ('gasto') {
+    <app-modal-gasto-personal />
+  }
+  @case ('presupuesto') {
+    <app-modal-presupuesto />
+  }
+}

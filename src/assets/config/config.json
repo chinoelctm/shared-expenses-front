@@ -1,4 +1,5 @@
 {
   "MesInicial": "2026-10",
-  "ListaCuotasRapidas": [3, 6, 12, 24]
+  "ListaCuotasRapidas": [3, 6, 12, 24],
+  "UmbralAvisoPresupuesto": 75
 }

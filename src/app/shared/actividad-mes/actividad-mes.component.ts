@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { PlanillaStore } from '../../../../core/state/planilla.store';
-import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
-import { FechaCortaPipe } from '../../../../core/pipes/fecha-corta.pipe';
-import { GastoDelDia } from '../../../../core/utils/actividad';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { PesoChilenoPipe } from '../../core/pipes/peso-chileno.pipe';
+import { FechaCortaPipe } from '../../core/pipes/fecha-corta.pipe';
+import { GastoDelDia } from '../../core/utils/actividad';
+import { GastoReciente } from '../../core/interfaces/Planilla';
 
-/** Gasto variable por día del mes y los últimos gastos registrados (solo presentación, sin lógica propia). */
+/**
+ * Gasto por día del mes y los últimos gastos registrados. Solo presentación: lo usan la planilla compartida y los
+ * gastos personales, cada una con sus datos.
+ */
 @Component({
   selector: 'app-actividad-mes',
   standalone: true,
@@ -15,11 +18,18 @@ import { GastoDelDia } from '../../../../core/utils/actividad';
 })
 export class ActividadMesComponent {
 
-  protected readonly store = inject(PlanillaStore);
+  readonly dias = input.required<GastoDelDia[]>();
+  readonly ultimos = input.required<GastoReciente[]>();
+  // Qué gastos entran en el gráfico (se muestra bajo el título)
+  readonly subtitulo = input.required<string>();
+  // Posición en la cascada de entrada de la página
+  readonly indice = input(6);
 
-  protected readonly dias = this.store.gastosVariablesPorDia;
+  readonly editar = output<GastoReciente>();
+  readonly nuevo = output<void>();
+
   protected readonly maximo = computed(() => Math.max(1, ...this.dias().map(d => d.monto)));
-  protected readonly totalVariable = computed(() => this.dias().reduce((suma, d) => suma + d.monto, 0));
+  protected readonly totalDias = computed(() => this.dias().reduce((suma, d) => suma + d.monto, 0));
   protected readonly diaMayor = computed(() => {
     const mayor = this.dias().reduce((a, b) => (b.monto > a.monto ? b : a), this.dias()[0]);
     return mayor?.monto ? mayor : null;

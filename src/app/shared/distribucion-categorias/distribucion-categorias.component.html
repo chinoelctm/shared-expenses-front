@@ -19,7 +19,7 @@
         <canvas #grafico aria-label="Gráfico de dona con el gasto por categoría" role="img"></canvas>
         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
           <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total mes</span>
-          <span class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight tabular-nums">{{ store.resumen()?.total | pesoChileno }}</span>
+          <span class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight tabular-nums">{{ total() | pesoChileno }}</span>
         </div>
       </div>
     </div>

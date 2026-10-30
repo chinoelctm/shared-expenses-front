@@ -41,6 +41,17 @@ quién es el usuario por `GET /api/v1/auth/me` (`SesionStore`).
   una vez. Varias llamadas con 401 a la vez comparten un solo refresh. Si no se puede renovar (refresh vencido o
   revocado), manda al login. Antes de rendirse consulta `/me`, por si otra pestaña acababa de rotar las cookies.
 
+## Gastos personales
+
+La pestaña *Personales* del header (`/personales`) muestra los gastos propios del usuario de la sesión: no se reparten y
+siempre son variables (sin arriendo ni costos fijos). Igual que la planilla: navegación por mes, gasto por día, últimos
+gastos, categorías, tabla y alta/edición/eliminación (con cuotas). Al cambiar de pestaña se conserva el mes.
+
+**Aviso de presupuesto**: muestra lo gastado contra el presupuesto configurado (botón *Presupuesto*). El color cambia de
+forma continua: verde, amarillo desde el umbral de aviso (`UmbralAvisoPresupuesto` en `config.json`, 75 %), naranjo al
+100 % y rojo al pasarse, con el mensaje "¡Te pasaste del presupuesto por $X!". El presupuesto rige desde el mes en que se
+configura y en los siguientes hasta que se cambie.
+
 ## Mover un gasto al próximo mes
 
 Al editar un gasto pendiente (no fijo ni arriendo) aparece *Mover al próximo mes*: pide confirmación y la API lo pasa
@@ -62,17 +73,21 @@ rewrite en `render.yaml` y haz push.
 src/app
 ├── core
 │   ├── http/          Un servicio por recurso de la API: auth, people, categories, settings, months,
-│   │                  expenses, backup. Todos async con lastValueFrom.
+│   │                  expenses, personal, backup. Todos async con lastValueFrom.
 │   ├── guards/        sesionGuard y anonimoGuard (login)
 │   ├── interceptors/  authInterceptor (401 → refresh de la sesión → reintento)
 │   ├── interfaces/    requests/ y responses/ (contratos de la API) + tipos de UI
 │   ├── pipes/         pesoChileno, nombreMes, fechaCorta
-│   ├── state/         PlanillaStore (planilla, signals y acciones) y SesionStore (login, refresh, logout)
-│   └── utils/         Errores de la API, vista previa de repartos, gasto por día, fechas, toast, confirmación, colores
+│   ├── state/         PlanillaStore (planilla compartida), PersonalStore (gastos personales y presupuesto)
+│   │                  y SesionStore (login, refresh, logout)
+│   └── utils/         Errores de la API, vista previa de repartos, gasto por día, aviso de presupuesto, fechas,
+│                      toast, confirmación, colores
 ├── modulos
 │   ├── login/             Pantalla de inicio de sesión
-│   └── planilla-gastos/   Página principal + componentes (KPIs, gasto por día, categorías, tabla, modales)
-└── shared/            header, toast, confirm-dialog, categoria-badge (color de la API), minigrafico
+│   ├── planilla-gastos/   Planilla compartida (/) + componentes (KPIs, tabla, modales)
+│   └── gastos-personales/ Gastos personales (/personales) + aviso de presupuesto, tabla y modales
+└── shared/            header (pestañas Compartidos / Personales), toast, confirm-dialog, categoria-badge,
+                       minigrafico, actividad-mes (gasto por día + últimos), distribucion-categorias
 ```
 
 ## Qué calcula cada lado

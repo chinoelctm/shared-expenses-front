@@ -19,8 +19,10 @@
   </div>
 
   <app-resumen-kpi />
-  <app-actividad-mes />
-  <app-distribucion-categorias class="block entrada" style="--i: 9" />
+  <app-actividad-mes [dias]="store.gastosVariablesPorDia()" [ultimos]="store.ultimosGastos()"
+                     subtitulo="Gastos variables y cuotas según su fecha · sin arriendo ni costos fijos"
+                     (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
+  <app-distribucion-categorias class="block entrada" style="--i: 9" [resumen]="store.resumen()?.categories ?? []" [total]="store.resumen()?.total" />
   <app-tabla-gastos class="block entrada" style="--i: 10" />
 </main>
 

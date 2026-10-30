@@ -1,8 +1,8 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, OnDestroy, signal, ViewChild } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Tooltip } from 'chart.js';
-import { PlanillaStore } from '../../../../core/state/planilla.store';
-import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
-import { CategoriaResumen } from '../../../../core/interfaces/Planilla';
+import { PesoChilenoPipe } from '../../core/pipes/peso-chileno.pipe';
+import { CategoriaResumen } from '../../core/interfaces/Planilla';
+import { CategorySummary } from '../../core/interfaces/responses/MonthSummaryResponse';
 
 Chart.register(DoughnutController, ArcElement, Tooltip);
 
@@ -17,11 +17,13 @@ export class DistribucionCategoriasComponent implements AfterViewInit, OnDestroy
 
   @ViewChild('grafico') private readonly canvas!: ElementRef<HTMLCanvasElement>;
 
-  protected readonly store = inject(PlanillaStore);
+  // Desglose del mes (de la API) y total para el centro de la dona; lo usan la planilla y los gastos personales
+  readonly resumen = input.required<CategorySummary[]>();
+  readonly total = input<number | null | undefined>(0);
 
   // Montos, porcentajes y colores (los configurados por categoría) vienen de la API
   protected readonly categorias = computed<CategoriaResumen[]>(() =>
-    (this.store.resumen()?.categories ?? []).map(c => ({
+    this.resumen().map(c => ({
       nombre: c.name,
       monto: c.amount,
       porcentaje: c.percentage,
