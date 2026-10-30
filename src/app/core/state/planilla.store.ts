@@ -16,7 +16,7 @@ import { PersonAmount, PersonResponse } from '../interfaces/responses/PersonResp
 import { SettingsResponse } from '../interfaces/responses/SettingsResponse';
 import { CategoryResponse } from '../interfaces/responses/CategoryResponse';
 import { ExpenseResponse } from '../interfaces/responses/ExpenseResponse';
-import { MonthSummaryResponse } from '../interfaces/responses/MonthSummaryResponse';
+import { MonthSummaryResponse, MonthTotal } from '../interfaces/responses/MonthSummaryResponse';
 import { DeleteScope, ExpenseRequest } from '../interfaces/requests/ExpenseRequest';
 import { SettingsRequest } from '../interfaces/requests/SettingsRequest';
 import { RentRequest } from '../interfaces/requests/RentRequest';
@@ -75,6 +75,8 @@ export class PlanillaStore {
   readonly mesSeleccionado = signal<string>(environment.MesInicial);
   readonly gastos = signal<ExpenseResponse[]>([]);
   readonly resumen = signal<MonthSummaryResponse | null>(null);
+  // Total de los últimos meses hasta el seleccionado (gráfico de gasto mensual)
+  readonly historial = signal<MonthTotal[]>([]);
   readonly mesesRegistrados = signal<string[]>([]);
   readonly filtro = signal<FiltroGasto>('all');
   readonly cargando = signal<boolean>(false);
@@ -153,7 +155,8 @@ export class PlanillaStore {
     this.cargando.set(true);
     const resp = await this.ejecutar(() => Promise.all([
       this._monthsService.obtenerGastos(mes),
-      this._monthsService.obtenerResumen(mes)
+      this._monthsService.obtenerResumen(mes),
+      this._monthsService.obtenerHistorial(mes)
     ]));
 
     // Si el usuario cambió de mes mientras cargaba, se descarta la respuesta vieja
@@ -161,9 +164,10 @@ export class PlanillaStore {
     this.cargando.set(false);
     if (!resp) return;
 
-    const [gastos, resumen] = resp.valor;
+    const [gastos, resumen, historial] = resp.valor;
     this.gastos.set(gastos.items);
     this.resumen.set(resumen);
+    this.historial.set(historial);
   }
 
   // ---------- Navegación ----------

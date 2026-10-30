@@ -37,3 +37,10 @@ export interface PersonalBudget {
     // Puede superar 100
     percentage: number;
 }
+
+// Total personal de un mes y el presupuesto que regía (null si no había)
+export interface PersonalMonthTotal {
+    month:  string;
+    total:  number;
+    budget: number | null;
+}

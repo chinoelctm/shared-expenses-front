@@ -1,32 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { PesoChilenoPipe } from '../../core/pipes/peso-chileno.pipe';
 import { FechaCortaPipe } from '../../core/pipes/fecha-corta.pipe';
 import { GastoDelDia } from '../../core/utils/actividad';
-import { GastoReciente } from '../../core/interfaces/Planilla';
 
-/**
- * Gasto por día del mes y los últimos gastos registrados. Solo presentación: lo usan la planilla compartida y los
- * gastos personales, cada una con sus datos.
- */
+/** Gasto de cada día del mes con la barra de hoy destacada. Solo presentación. */
 @Component({
-  selector: 'app-actividad-mes',
+  selector: 'app-gasto-por-dia',
   standalone: true,
   imports: [PesoChilenoPipe, FechaCortaPipe],
-  templateUrl: './actividad-mes.component.html',
+  templateUrl: './gasto-por-dia.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block' }
+  host: { class: 'flex flex-col' }
 })
-export class ActividadMesComponent {
+export class GastoPorDiaComponent {
 
   readonly dias = input.required<GastoDelDia[]>();
-  readonly ultimos = input.required<GastoReciente[]>();
   // Qué gastos entran en el gráfico (se muestra bajo el título)
   readonly subtitulo = input.required<string>();
-  // Posición en la cascada de entrada de la página
-  readonly indice = input(6);
-
-  readonly editar = output<GastoReciente>();
-  readonly nuevo = output<void>();
 
   protected readonly maximo = computed(() => Math.max(1, ...this.dias().map(d => d.monto)));
   protected readonly totalDias = computed(() => this.dias().reduce((suma, d) => suma + d.monto, 0));

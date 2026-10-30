@@ -19,11 +19,17 @@
   </div>
 
   <app-aviso-presupuesto class="block entrada" style="--i: 1" />
-  <app-actividad-mes [dias]="store.gastosPorDia()" [ultimos]="store.ultimosGastos()" [indice]="2"
-                     subtitulo="Tus gastos y cuotas según su fecha"
-                     (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
-  <app-distribucion-categorias class="block entrada" style="--i: 5" [resumen]="store.resumen()?.categories ?? []" [total]="store.resumen()?.total" />
-  <app-tabla-personal class="block entrada" style="--i: 6" />
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+    <app-gasto-por-dia class="lg:col-span-2 entrada" style="--i: 2" [dias]="store.gastosPorDia()" subtitulo="Tus gastos y cuotas según su fecha" />
+    <app-ultimos-gastos class="entrada" style="--i: 3" [ultimos]="store.ultimosGastos()" [indice]="4"
+                        (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
+  </div>
+  <app-grafico-mensual class="entrada" style="--i: 5"
+                       [barras]="barrasMensuales()" [mesSeleccionado]="store.mesSeleccionado()" [leyenda]="leyendaMensual"
+                       subtitulo="Tu total de cada mes · la línea punteada es el presupuesto · toca una barra para ir a ese mes"
+                       (seleccionar)="store.cambiarMes($event)" />
+  <app-distribucion-categorias class="block entrada" style="--i: 6" [resumen]="store.resumen()?.categories ?? []" [total]="store.resumen()?.total" />
+  <app-tabla-personal class="block entrada" style="--i: 7" />
 </main>
 
 <!-- Botón flotante (+) -->

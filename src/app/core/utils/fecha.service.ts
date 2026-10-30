@@ -21,6 +21,13 @@ export class FechaService {
     return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
   }
 
+  // "2026-10" => "Oct"
+  nombreMesCorto(mes: string): string {
+    const [y, m] = mes.split('-').map(Number);
+    const nombre = new Date(y, m - 1, 1).toLocaleDateString('es-CL', { month: 'short' }).replace('.', '');
+    return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+  }
+
   nombreMes(mes: string): string {
     const [y, m] = mes.split('-').map(Number);
     const nombre = new Date(y, m - 1, 1).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });

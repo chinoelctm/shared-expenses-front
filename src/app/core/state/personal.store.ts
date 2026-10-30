@@ -7,7 +7,7 @@ import { mensajeDeError } from '../utils/api-error';
 import { gastosPorDia } from '../utils/actividad';
 import { PesoChilenoPipe } from '../pipes/peso-chileno.pipe';
 import { CategoryResponse } from '../interfaces/responses/CategoryResponse';
-import { PersonalExpenseResponse, PersonalSummaryResponse } from '../interfaces/responses/PersonalResponse';
+import { PersonalExpenseResponse, PersonalMonthTotal, PersonalSummaryResponse } from '../interfaces/responses/PersonalResponse';
 import { PersonalExpenseRequest } from '../interfaces/requests/PersonalExpenseRequest';
 import { DeleteScope } from '../interfaces/requests/ExpenseRequest';
 
@@ -33,6 +33,8 @@ export class PersonalStore {
   readonly mesesRegistrados = signal<string[]>([]);
   readonly gastos = signal<PersonalExpenseResponse[]>([]);
   readonly resumen = signal<PersonalSummaryResponse | null>(null);
+  // Total y presupuesto de los últimos meses hasta el seleccionado (gráfico de gasto mensual)
+  readonly historial = signal<PersonalMonthTotal[]>([]);
   readonly cargando = signal<boolean>(false);
   readonly modalAbierto = signal<ModalPersonal>(null);
   readonly gastoEnEdicion = signal<PersonalExpenseResponse | null>(null);
@@ -70,7 +72,8 @@ export class PersonalStore {
     this.cargando.set(true);
     const resp = await this.ejecutar(() => Promise.all([
       this._personalService.obtenerGastos(mes),
-      this._personalService.obtenerResumen(mes)
+      this._personalService.obtenerResumen(mes),
+      this._personalService.obtenerHistorial(mes)
     ]));
 
     // Si el usuario cambió de mes mientras cargaba, se descarta la respuesta vieja
@@ -78,9 +81,10 @@ export class PersonalStore {
     this.cargando.set(false);
     if (!resp) return;
 
-    const [gastos, resumen] = resp.valor;
+    const [gastos, resumen, historial] = resp.valor;
     this.gastos.set(gastos.items);
     this.resumen.set(resumen);
+    this.historial.set(historial);
   }
 
   async cambiarMes(mes: string) {

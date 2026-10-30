@@ -4,7 +4,8 @@ import { SesionStore } from '../../core/state/sesion.store';
 import { NombreMesPipe } from '../../core/pipes/nombre-mes.pipe';
 import { GastoReciente } from '../../core/interfaces/Planilla';
 import { ResumenKpiComponent } from './components/resumen-kpi/resumen-kpi.component';
-import { ActividadMesComponent } from '../../shared/actividad-mes/actividad-mes.component';
+import { BarraMensual, GraficoMensualComponent, SegmentoMensual } from '../../shared/grafico-mensual/grafico-mensual.component';
+import { UltimosGastosComponent } from '../../shared/ultimos-gastos/ultimos-gastos.component';
 import { DistribucionCategoriasComponent } from '../../shared/distribucion-categorias/distribucion-categorias.component';
 import { TablaGastosComponent } from './components/tabla-gastos/tabla-gastos.component';
 import { ModalArriendoComponent } from './components/modal-arriendo/modal-arriendo.component';
@@ -17,7 +18,8 @@ import { ModalConfiguracionComponent } from './components/modal-configuracion/mo
   imports: [
     NombreMesPipe,
     ResumenKpiComponent,
-    ActividadMesComponent,
+    GraficoMensualComponent,
+    UltimosGastosComponent,
     DistribucionCategoriasComponent,
     TablaGastosComponent,
     ModalArriendoComponent,
@@ -40,6 +42,22 @@ export class PlanillaGastosComponent implements OnInit {
     const momento = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
     return nombre ? `${momento}, ${nombre}` : momento;
   });
+
+  // Gasto mensual: arriendo y fijos abajo, variables arriba (las clases quedan escritas completas para Tailwind)
+  protected readonly leyendaMensual: SegmentoMensual[] = [
+    { monto: 0, etiqueta: 'Arriendo y fijos', clase: 'bg-slate-400/80 dark:bg-slate-500/80' },
+    { monto: 0, etiqueta: 'Variables y cuotas', clase: 'bg-gradient-to-t from-indigo-500 to-sky-400' }
+  ];
+
+  protected readonly barrasMensuales = computed<BarraMensual[]>(() =>
+    this.store.historial().map(h => ({
+      mes: h.month,
+      total: h.total,
+      segmentos: [
+        { ...this.leyendaMensual[0], monto: h.fixed },
+        { ...this.leyendaMensual[1], monto: h.variable }
+      ]
+    })));
 
   ngOnInit(): void {
     this.store.inicializar();

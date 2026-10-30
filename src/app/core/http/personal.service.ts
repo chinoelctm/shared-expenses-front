@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { apiUrl } from './api';
 import { AddExpenseResponse } from '../interfaces/responses/ExpenseResponse';
-import { PersonalMonthExpensesResponse, PersonalSummaryResponse } from '../interfaces/responses/PersonalResponse';
+import { PersonalMonthExpensesResponse, PersonalMonthTotal, PersonalSummaryResponse } from '../interfaces/responses/PersonalResponse';
 import { PersonalExpenseRequest } from '../interfaces/requests/PersonalExpenseRequest';
 import { DeleteScope } from '../interfaces/requests/ExpenseRequest';
 
@@ -25,6 +25,11 @@ export class PersonalService {
 
   async obtenerResumen(mes: string): Promise<PersonalSummaryResponse> {
     return lastValueFrom(this._http.get<PersonalSummaryResponse>(`${apiUrl}/personal/months/${mes}/summary`));
+  }
+
+  // Total y presupuesto de los últimos meses hasta `mes`, del más antiguo al más reciente
+  async obtenerHistorial(mes: string): Promise<PersonalMonthTotal[]> {
+    return lastValueFrom(this._http.get<PersonalMonthTotal[]>(`${apiUrl}/personal/months/${mes}/history`));
   }
 
   // Rige desde ese mes y en los siguientes hasta que se cambie

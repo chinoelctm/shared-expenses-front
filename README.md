@@ -47,6 +47,10 @@ La pestaña *Personales* del header (`/personales`) muestra los gastos propios d
 siempre son variables (sin arriendo ni costos fijos). Igual que la planilla: navegación por mes, gasto por día, últimos
 gastos, categorías, tabla y alta/edición/eliminación (con cuotas). Al cambiar de pestaña se conserva el mes.
 
+**Gasto mensual**: barras con el total de los últimos 6 meses hasta el mes que se ve (al tocar una se va a ese mes).
+En la planilla compartida reemplaza al gasto por día y separa arriendo y fijos de los variables; en los gastos
+personales va junto al gasto por día y cada barra toma el color del aviso según su presupuesto (línea punteada).
+
 **Aviso de presupuesto**: muestra lo gastado contra el presupuesto configurado (botón *Presupuesto*). El color cambia de
 forma continua: verde, amarillo desde el umbral de aviso (`UmbralAvisoPresupuesto` en `config.json`, 75 %), naranjo al
 100 % y rojo al pasarse, con el mensaje "¡Te pasaste del presupuesto por $X!". El presupuesto rige desde el mes en que se
@@ -87,7 +91,7 @@ src/app
 │   ├── planilla-gastos/   Planilla compartida (/) + componentes (KPIs, tabla, modales)
 │   └── gastos-personales/ Gastos personales (/personales) + aviso de presupuesto, tabla y modales
 └── shared/            header (pestañas Compartidos / Personales), toast, confirm-dialog, categoria-badge,
-                       minigrafico, actividad-mes (gasto por día + últimos), distribucion-categorias
+                       minigrafico, gasto-por-dia, ultimos-gastos, grafico-mensual, distribucion-categorias
 ```
 
 ## Qué calcula cada lado

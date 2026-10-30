@@ -19,9 +19,14 @@
   </div>
 
   <app-resumen-kpi />
-  <app-actividad-mes [dias]="store.gastosVariablesPorDia()" [ultimos]="store.ultimosGastos()"
-                     subtitulo="Gastos variables y cuotas según su fecha · sin arriendo ni costos fijos"
-                     (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+    <app-grafico-mensual class="lg:col-span-2 entrada" style="--i: 6"
+                         [barras]="barrasMensuales()" [mesSeleccionado]="store.mesSeleccionado()" [leyenda]="leyendaMensual"
+                         subtitulo="Total de cada mes (con arriendo) · toca una barra para ir a ese mes"
+                         (seleccionar)="store.cambiarMes($event)" />
+    <app-ultimos-gastos class="entrada" style="--i: 7" [ultimos]="store.ultimosGastos()"
+                        (editar)="editarReciente($event)" (nuevo)="store.abrirModalNuevoGasto()" />
+  </div>
   <app-distribucion-categorias class="block entrada" style="--i: 9" [resumen]="store.resumen()?.categories ?? []" [total]="store.resumen()?.total" />
   <app-tabla-gastos class="block entrada" style="--i: 10" />
 </main>

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { apiUrl } from './api';
 import { MonthExpensesResponse } from '../interfaces/responses/ExpenseResponse';
-import { MonthSummaryResponse } from '../interfaces/responses/MonthSummaryResponse';
+import { MonthSummaryResponse, MonthTotal } from '../interfaces/responses/MonthSummaryResponse';
 import { RentRequest } from '../interfaces/requests/RentRequest';
 
 @Injectable({
@@ -24,6 +24,11 @@ export class MonthsService {
 
   async obtenerResumen(mes: string): Promise<MonthSummaryResponse> {
     return lastValueFrom(this._http.get<MonthSummaryResponse>(`${apiUrl}/months/${mes}/summary`));
+  }
+
+  // Total de los últimos meses hasta `mes`, del más antiguo al más reciente (no abre meses nuevos)
+  async obtenerHistorial(mes: string): Promise<MonthTotal[]> {
+    return lastValueFrom(this._http.get<MonthTotal[]>(`${apiUrl}/months/${mes}/history`));
   }
 
   async actualizarArriendo(mes: string, request: RentRequest): Promise<void> {

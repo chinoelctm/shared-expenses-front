@@ -36,3 +36,12 @@ export interface CategorySummary {
     amount:     number;
     percentage: number;
 }
+
+// Total de un mes para el gráfico de gasto mensual
+export interface MonthTotal {
+    month:    string;
+    total:    number;
+    // Arriendo y costos fijos
+    fixed:    number;
+    variable: number;
+}
