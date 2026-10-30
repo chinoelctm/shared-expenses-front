@@ -2,33 +2,42 @@
 <section class="vidrio rounded-2xl p-4 sm:p-5 flex flex-col flex-1" aria-labelledby="titulo-ultimos">
   <div class="flex items-center justify-between mb-3">
     <h3 id="titulo-ultimos" class="text-base font-bold text-slate-900 dark:text-white">Últimos gastos</h3>
-    <span class="text-[11px] text-slate-500 dark:text-slate-400">por fecha</span>
+    <span class="text-[11px] text-slate-500 dark:text-slate-400">
+      {{ ultimos().length }} {{ ultimos().length === 1 ? 'gasto' : 'gastos' }} · por fecha
+    </span>
   </div>
 
-  <ol class="relative space-y-1 before:absolute before:left-[19px] before:top-3 before:bottom-3 before:w-px before:bg-slate-900/10 dark:before:bg-white/10">
-    @for (gasto of ultimos(); track gasto.id; let i = $index) {
-      <li class="entrada block" [style.--i]="indice() + i">
-        <button type="button" (click)="editar.emit(gasto)" class="relative w-full text-left flex items-start gap-3 p-1.5 rounded-xl hover:bg-white/60 dark:hover:bg-white/[0.07] transition group"
-                [style.background-image]="'linear-gradient(90deg, ' + gasto.categoryColor + '26, transparent 70%)'">
-          <span class="relative z-10 w-7 h-7 mt-0.5 ml-[5px] rounded-full vidrio-fuerte flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true">
-            <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="gasto.categoryColor"></span>
-          </span>
-          <span class="min-w-0 flex-1">
-            <span class="flex items-center justify-between gap-2">
-              <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ gasto.description }}</span>
-              <span class="text-sm font-bold text-slate-900 dark:text-white tabular-nums shrink-0">{{ gasto.amount | pesoChileno }}</span>
-            </span>
-            <span class="block text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              {{ gasto.date | fechaCorta }} · {{ gasto.categoryName }}@if (gasto.paidByName) { · pagó {{ gasto.paidByName }}}@if (gasto.installment && gasto.installment.total > 1) { · cuota {{ gasto.installment.number }}/{{ gasto.installment.total }}}
-            </span>
-          </span>
-        </button>
-      </li>
-    } @empty {
-      <li class="flex flex-col items-center justify-center text-center py-8 px-4">
-        <span class="text-sm text-slate-500 dark:text-slate-400">Todavía no hay gastos este mes.</span>
-        <button type="button" (click)="nuevo.emit()" class="mt-2 rounded-lg text-sm font-semibold text-indigo-600 dark:text-indigo-300 hover:underline">Registrar el primero</button>
-      </li>
-    }
-  </ol>
+  <!-- La lista llena el alto de la caja (en pantallas anchas lo marcan los gráficos de al lado) sin agrandarla: los
+       gastos que no caben se ven desplazándose dentro de ella. En el teléfono tiene un alto máximo propio -->
+  <div class="relative flex-1 min-h-0">
+    <div class="max-h-80 lg:max-h-none lg:absolute lg:inset-0 overflow-y-auto overscroll-contain -mr-2 pr-2">
+      <ol class="relative space-y-1 before:absolute before:left-[19px] before:top-3 before:bottom-3 before:w-px before:bg-slate-900/10 dark:before:bg-white/10">
+        @for (gasto of ultimos(); track gasto.id; let i = $index) {
+          <!-- La cascada de entrada se corta en el octavo: con muchos gastos la espera sería larga -->
+          <li class="entrada block" [style.--i]="indice() + (i < 8 ? i : 8)">
+            <button type="button" (click)="editar.emit(gasto)" class="relative w-full text-left flex items-start gap-3 p-1.5 rounded-xl hover:bg-white/60 dark:hover:bg-white/[0.07] transition group"
+                    [style.background-image]="'linear-gradient(90deg, ' + gasto.categoryColor + '26, transparent 70%)'">
+              <span class="relative z-10 w-7 h-7 mt-0.5 ml-[5px] rounded-full vidrio-fuerte flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform" aria-hidden="true">
+                <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="gasto.categoryColor"></span>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-center justify-between gap-2">
+                  <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ gasto.description }}</span>
+                  <span class="text-sm font-bold text-slate-900 dark:text-white tabular-nums shrink-0">{{ gasto.amount | pesoChileno }}</span>
+                </span>
+                <span class="block text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                  {{ gasto.date | fechaCorta }} · {{ gasto.categoryName }}@if (gasto.paidByName) { · pagó {{ gasto.paidByName }}}@if (gasto.installment && gasto.installment.total > 1) { · cuota {{ gasto.installment.number }}/{{ gasto.installment.total }}}
+                </span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="flex flex-col items-center justify-center text-center py-8 px-4">
+            <span class="text-sm text-slate-500 dark:text-slate-400">Todavía no hay gastos este mes.</span>
+            <button type="button" (click)="nuevo.emit()" class="mt-2 rounded-lg text-sm font-semibold text-indigo-600 dark:text-indigo-300 hover:underline">Registrar el primero</button>
+          </li>
+        }
+      </ol>
+    </div>
+  </div>
 </section>

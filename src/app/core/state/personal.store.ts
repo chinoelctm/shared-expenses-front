@@ -43,11 +43,12 @@ export class PersonalStore {
     [...new Set([...this.mesesRegistrados(), this._fechaService.claveMesHoy(), this.mesSeleccionado()])].sort()
   );
 
-  // Presentación: gasto por día del mes y los últimos según su fecha (la API no guarda la hora de registro)
+  // Presentación: gasto por día del mes y los gastos del más reciente al más antiguo según su fecha (la API no guarda
+  // la hora de registro); la lista de últimos gastos muestra los que caben en su caja
   readonly gastosPorDia = computed(() =>
     gastosPorDia(this.gastos(), this.mesSeleccionado(), this._fechaService.fechaHoy()));
   readonly ultimosGastos = computed(() =>
-    [...this.gastos()].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5));
+    [...this.gastos()].sort((a, b) => b.date.localeCompare(a.date)));
 
   // ---------- Carga ----------
 

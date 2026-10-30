@@ -102,9 +102,10 @@ export class PlanillaStore {
   readonly gastosVariablesPorDia = computed(() =>
     gastosPorDia(this.gastos().filter(g => !g.isFixed), this.mesSeleccionado(), this._fechaService.fechaHoy()));
 
-  // Los últimos gastos variables del mes según su fecha (la API no guarda la hora de registro)
+  // Gastos variables del mes del más reciente al más antiguo según su fecha (la API no guarda la hora de registro);
+  // la lista muestra los que caben en su caja
   readonly ultimosGastos = computed(() =>
-    this.gastos().filter(g => !g.isFixed).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5));
+    this.gastos().filter(g => !g.isFixed).sort((a, b) => b.date.localeCompare(a.date)));
 
   /** Parte de cada persona en un gasto (monto y si está saldada), en el mismo orden que personas(). */
   partesPorPersona(gasto: ExpenseResponse): (PersonAmount | null)[] {
