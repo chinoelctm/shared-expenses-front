@@ -12,6 +12,8 @@ export interface PersonalExpenseResponse {
     categoryName:  string;
     categoryColor: string;
     installment:   Installment | null;
+    // Cuándo se registró (UTC, ISO); ordena los últimos gastos registrados
+    createdOn:     string;
 }
 
 export interface PersonalMonthExpensesResponse {

@@ -1,0 +1,22 @@
+<div>
+  <div class="flex items-center justify-between mb-1">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{{ titulo() }}</h4>
+    <button type="button" (click)="agregar()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">+ Agregar categoría</button>
+  </div>
+  <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+    Son las mismas para los gastos compartidos y los personales. Al eliminar una deja de ofrecerse para gastos nuevos; los gastos que ya la usan la conservan.
+  </p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    @for (categoria of lista; track $index) {
+      <div class="flex items-center gap-2 p-2 rounded-xl vidrio-sutil">
+        <input type="color" [(ngModel)]="categoria.color" aria-label="Color de la categoría" title="Elegir color" class="w-8 h-8 p-0 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent cursor-pointer flex-shrink-0">
+        <input type="text" [(ngModel)]="categoria.name" placeholder="Nombre" aria-label="Nombre de la categoría" maxlength="40" class="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-semibold" [style.color]="categoria.color">
+        @if (categoria.locked) {
+          <span class="p-1 text-slate-400 text-xs" title="La usa el arriendo de cada mes: no se puede eliminar">🔒</span>
+        } @else {
+          <button type="button" (click)="quitar($index)" class="p-1 text-slate-400 hover:text-rose-500" title="Eliminar categoría" aria-label="Eliminar categoría">✕</button>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -3,12 +3,13 @@
   <div class="flex items-center justify-between mb-3">
     <h3 id="titulo-ultimos" class="text-base font-bold text-slate-900 dark:text-white">Últimos gastos</h3>
     <span class="text-[11px] text-slate-500 dark:text-slate-400">
-      {{ ultimos().length }} {{ ultimos().length === 1 ? 'gasto' : 'gastos' }} · por fecha
+      los 6 más recientes
     </span>
   </div>
 
-  <!-- La lista llena el alto de la caja (en pantallas anchas lo marcan los gráficos de al lado) sin agrandarla: los
-       gastos que no caben se ven desplazándose dentro de ella. En el teléfono tiene un alto máximo propio -->
+  <!-- Los 6 gastos registrados más recientemente. La lista llena el alto de la caja (en pantallas anchas lo marcan los
+       gráficos de al lado) sin agrandarla: si no caben, se ven desplazándose dentro de ella. En el teléfono tiene un
+       alto máximo propio -->
   <div class="relative flex-1 min-h-0">
     <div class="max-h-80 lg:max-h-none lg:absolute lg:inset-0 overflow-y-auto overscroll-contain -mr-2 pr-2">
       <ol class="relative space-y-1 before:absolute before:left-[19px] before:top-3 before:bottom-3 before:w-px before:bg-slate-900/10 dark:before:bg-white/10">

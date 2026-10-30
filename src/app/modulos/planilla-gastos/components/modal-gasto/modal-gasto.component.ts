@@ -37,8 +37,8 @@ export class ModalGastoComponent implements OnInit {
   protected descripcion = '';
   protected monto: number | null = null;
   protected fecha = '';
-  // Por defecto, la primera categoría activa
-  protected categoria = this.store.categorias()[0]?.id ?? '';
+  // Por defecto, la primera categoría activa en orden alfabético (como se muestran)
+  protected categoria = this.store.categoriasOrdenadas()[0]?.id ?? '';
   protected pagado = false;
   // Id de quien pagó el total ('' = nadie todavía)
   protected pagadoPor = '';

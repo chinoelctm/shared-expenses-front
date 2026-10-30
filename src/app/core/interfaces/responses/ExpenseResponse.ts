@@ -18,6 +18,8 @@ export interface ExpenseResponse {
     paidByName:   string | null;
     installment:  Installment | null;
     split:        PersonAmount[];
+    // Cuándo se registró (UTC, ISO); ordena los últimos gastos registrados
+    createdOn:    string;
 }
 
 export interface Installment {

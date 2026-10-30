@@ -32,7 +32,7 @@ export class ModalGastoPersonalComponent implements OnInit {
   protected descripcion = '';
   protected monto: number | null = null;
   protected fecha = '';
-  protected categoria = this.store.categorias()[0]?.id ?? '';
+  protected categoria = this.store.categoriasOrdenadas()[0]?.id ?? '';
   protected cuotasHabilitadas = false;
   protected cuotas: number | null = CUOTAS_POR_DEFECTO;
   protected guardando = false;

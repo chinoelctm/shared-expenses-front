@@ -4,7 +4,8 @@ import { CategoriesService } from '../http/categories.service';
 import { FechaService } from '../utils/fecha.service';
 import { ToastService } from '../utils/toast.service';
 import { mensajeDeError } from '../utils/api-error';
-import { gastosPorDia } from '../utils/actividad';
+import { gastosPorDia, ultimosRegistrados } from '../utils/actividad';
+import { aplicarCambiosCategorias, CambiosCategorias, ordenarCategorias } from '../utils/categorias';
 import { PesoChilenoPipe } from '../pipes/peso-chileno.pipe';
 import { CategoryResponse } from '../interfaces/responses/CategoryResponse';
 import { PersonalExpenseResponse, PersonalMonthTotal, PersonalSummaryResponse } from '../interfaces/responses/PersonalResponse';
@@ -29,6 +30,8 @@ export class PersonalStore {
   private readonly _pesoChileno = new PesoChilenoPipe();
 
   readonly categorias = signal<CategoryResponse[]>([]);
+  // De la A a la Z, como se ofrecen al registrar un gasto
+  readonly categoriasOrdenadas = computed(() => ordenarCategorias(this.categorias()));
   readonly mesSeleccionado = signal<string>(this._fechaService.claveMesHoy());
   readonly mesesRegistrados = signal<string[]>([]);
   readonly gastos = signal<PersonalExpenseResponse[]>([]);
@@ -43,12 +46,11 @@ export class PersonalStore {
     [...new Set([...this.mesesRegistrados(), this._fechaService.claveMesHoy(), this.mesSeleccionado()])].sort()
   );
 
-  // Presentación: gasto por día del mes y los gastos del más reciente al más antiguo según su fecha (la API no guarda
-  // la hora de registro); la lista de últimos gastos muestra los que caben en su caja
+  // Presentación: gasto por día del mes y los últimos 6 gastos registrados (por cuándo se ingresaron)
   readonly gastosPorDia = computed(() =>
     gastosPorDia(this.gastos(), this.mesSeleccionado(), this._fechaService.fechaHoy()));
   readonly ultimosGastos = computed(() =>
-    [...this.gastos()].sort((a, b) => b.date.localeCompare(a.date)));
+    ultimosRegistrados(this.gastos()));
 
   // ---------- Carga ----------
 
@@ -156,14 +158,24 @@ export class PersonalStore {
     this._toastService.mostrar(alcance === 'Plan' ? 'Se eliminaron las cuotas del plan' : 'Gasto eliminado', '🗑️');
   }
 
-  async guardarPresupuesto(monto: number) {
+  /**
+   * Configuración personal: aplica los cambios de categorías (compartidas con la planilla) y, si `monto` viene, el
+   * presupuesto desde el mes que se ve. Si un paso falla se detiene y recarga el estado real.
+   */
+  async guardarConfiguracion(monto: number | null, categorias: CambiosCategorias) {
     const mes = this.mesSeleccionado();
-    const resp = await this.ejecutar(() => this._personalService.actualizarPresupuesto(mes, monto));
+    const resp = await this.ejecutar(async () => {
+      await aplicarCambiosCategorias(this._categoriesService, this.categorias(), categorias);
+      if (monto !== null) await this._personalService.actualizarPresupuesto(mes, monto);
+    });
+
+    await Promise.all([this.cargarCategorias(), this.cargarMes()]);
     if (!resp) return;
 
     this.cerrarModal();
-    await this.cargarMes();
-    this._toastService.mostrar(`Presupuesto de ${this._pesoChileno.transform(monto)} desde ${this._fechaService.nombreMes(mes)}`, '🎯');
+    this._toastService.mostrar(monto !== null
+      ? `Presupuesto de ${this._pesoChileno.transform(monto)} desde ${this._fechaService.nombreMes(mes)}`
+      : 'Configuración guardada', monto !== null ? '🎯' : '⚙️');
   }
 
   private async recargarTrasGuardar() {

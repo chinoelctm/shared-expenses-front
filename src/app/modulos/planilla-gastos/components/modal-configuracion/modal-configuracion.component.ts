@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlanillaStore } from '../../../../core/state/planilla.store';
 import { ToastService } from '../../../../core/utils/toast.service';
 import { NombreMesPipe } from '../../../../core/pipes/nombre-mes.pipe';
 import { PesoChilenoPipe } from '../../../../core/pipes/peso-chileno.pipe';
 import { coloresPersona } from '../../../../core/utils/persona-colores';
+import { ordenarCategorias } from '../../../../core/utils/categorias';
+import { EditorCategoriasComponent } from '../../../../shared/editor-categorias/editor-categorias.component';
 
 interface PersonaEditable {
   id:           string | null;
@@ -18,20 +20,12 @@ interface CostoFijoEditable {
   category:    string;
 }
 
-interface CategoriaEditable {
-  id:     string | null;
-  name:   string;
-  color:  string;
-  locked: boolean;
-}
 
-const COLOR_NUEVA_CATEGORIA = '#64748b';
-const COLOR_HEX = /^#[0-9a-fA-F]{6}$/;
 
 @Component({
   selector: 'app-modal-configuracion',
   standalone: true,
-  imports: [FormsModule, NombreMesPipe, PesoChilenoPipe],
+  imports: [FormsModule, NombreMesPipe, PesoChilenoPipe, EditorCategoriasComponent],
   templateUrl: './modal-configuracion.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -40,11 +34,10 @@ export class ModalConfiguracionComponent implements OnInit {
   protected readonly store = inject(PlanillaStore);
   private readonly _toastService = inject(ToastService);
   protected readonly colores = coloresPersona;
+  private readonly editorCategorias = viewChild.required(EditorCategoriasComponent);
 
   protected personas: PersonaEditable[] = [];
   protected personasBorradas: string[] = [];
-  protected categorias: CategoriaEditable[] = [];
-  protected categoriasBorradas: string[] = [];
   protected arriendoMesActivo: number | null = null;
   protected arriendoBase: number | null = null;
   protected costosFijos: CostoFijoEditable[] = [];
@@ -55,7 +48,6 @@ export class ModalConfiguracionComponent implements OnInit {
   ngOnInit(): void {
     const config = this.store.configuracion();
     this.personas = this.store.personas().map(p => ({ id: p.id, name: p.name, contribution: p.contribution }));
-    this.categorias = this.store.categorias().map(c => ({ id: c.id, name: c.name, color: c.color, locked: c.locked }));
     this.arriendoMesOriginal = this.store.arriendo()?.amount ?? config?.defaultRent ?? 0;
     this.arriendoMesActivo = this.arriendoMesOriginal;
     this.arriendoBase = config?.defaultRent ?? 0;
@@ -82,23 +74,14 @@ export class ModalConfiguracionComponent implements OnInit {
     this.personas = this.personas.filter((_, i) => i !== indice);
   }
 
-  protected agregarCategoria() {
-    this.categorias = [...this.categorias, { id: null, name: '', color: COLOR_NUEVA_CATEGORIA, locked: false }];
-  }
 
-  protected quitarCategoria(indice: number) {
-    const categoria = this.categorias[indice];
-    if (categoria.locked) return;
-    if (categoria.id) this.categoriasBorradas = [...this.categoriasBorradas, categoria.id];
-    this.categorias = this.categorias.filter((_, i) => i !== indice);
-  }
 
   /**
    * Opciones de categoría para un costo fijo: las activas y, si el costo usa una categoría eliminada,
    * esa también (para no perderla al guardar).
    */
   protected opcionesCategoria(costo: CostoFijoEditable): { id: string; nombre: string }[] {
-    const activas = this.store.categorias().map(c => ({ id: c.id, nombre: c.name }));
+    const activas = ordenarCategorias(this.store.categorias()).map(c => ({ id: c.id, nombre: c.name }));
     if (activas.some(c => c.id === costo.category)) return activas;
 
     const original = this.store.configuracion()?.fixedCosts.find(cf => cf.category === costo.category);
@@ -130,14 +113,9 @@ export class ModalConfiguracionComponent implements OnInit {
       return;
     }
 
-    const categorias = this.categorias.map(c => ({ id: c.id, name: c.name.trim(), color: c.color }));
-    if (categorias.some(c => !c.name || !COLOR_HEX.test(c.color))) {
-      this._toastService.mostrar('Cada categoría necesita nombre y un color válido.', '⚠️');
-      return;
-    }
-    const nombresCategoria = categorias.map(c => c.name.toLowerCase());
-    if (new Set(nombresCategoria).size !== nombresCategoria.length) {
-      this._toastService.mostrar('Hay dos categorías con el mismo nombre.', '⚠️');
+    const errorCategorias = this.editorCategorias().error();
+    if (errorCategorias) {
+      this._toastService.mostrar(errorCategorias, '⚠️');
       return;
     }
 
@@ -147,8 +125,7 @@ export class ModalConfiguracionComponent implements OnInit {
     await this.store.guardarConfiguracion({
       personas,
       personasBorradas: this.personasBorradas,
-      categorias,
-      categoriasBorradas: this.categoriasBorradas,
+      categorias: this.editorCategorias().cambios(),
       configuracion: {
         defaultRent: Math.round(Number(this.arriendoBase)) || 0,
         fixedCosts: this.costosFijos

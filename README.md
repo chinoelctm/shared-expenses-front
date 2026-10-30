@@ -53,6 +53,10 @@ personales va en una fila con el gasto por día y los últimos gastos (fila acor
 mouse se agranda y las otras ceden espacio; en el teléfono van apiladas) y cada barra toma el color del aviso según su
 presupuesto (línea punteada). La distribución por categoría queda debajo, a todo el ancho.
 
+**Últimos gastos** muestra los 6 registrados más recientemente (por `createdOn`, no por la fecha del gasto). En los
+selectores de categoría al registrar un gasto, las categorías van de la A a la Z. La configuración personal (botón
+*Configuración*) incluye el presupuesto y la edición de categorías, las mismas de la planilla compartida.
+
 **Aviso de presupuesto**: muestra lo gastado contra el presupuesto configurado (botón *Presupuesto*). El color cambia de
 forma continua: verde, amarillo desde el umbral de aviso (`UmbralAvisoPresupuesto` en `config.json`, 75 %), naranjo al
 100 % y rojo al pasarse, con el mensaje "¡Te pasaste del presupuesto por $X!". El presupuesto rige desde el mes en que se

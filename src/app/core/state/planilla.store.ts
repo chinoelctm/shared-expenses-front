@@ -7,7 +7,8 @@ import { MonthsService } from '../http/months.service';
 import { ExpensesService } from '../http/expenses.service';
 import { BackupService } from '../http/backup.service';
 import { FechaService } from '../utils/fecha.service';
-import { gastosPorDia } from '../utils/actividad';
+import { gastosPorDia, ultimosRegistrados } from '../utils/actividad';
+import { aplicarCambiosCategorias, CambiosCategorias, ordenarCategorias } from '../utils/categorias';
 import { RepartoService } from '../utils/reparto.service';
 import { ToastService } from '../utils/toast.service';
 import { mensajeDeError } from '../utils/api-error';
@@ -34,17 +35,10 @@ export interface RepartoPrevio {
   monto:      number;
 }
 
-export interface CategoriaEditada {
-  id:    string | null;
-  name:  string;
-  color: string;
-}
-
 export interface CambiosConfiguracion {
   personas:          PersonaEditada[];
   personasBorradas:  string[];
-  categorias:        CategoriaEditada[];
-  categoriasBorradas: string[];
+  categorias:        CambiosCategorias;
   configuracion:     SettingsRequest;
   arriendoMes:       RentRequest | null;
 }
@@ -72,6 +66,8 @@ export class PlanillaStore {
   readonly personas = signal<PersonResponse[]>([]);
   readonly configuracion = signal<SettingsResponse | null>(null);
   readonly categorias = signal<CategoryResponse[]>([]);
+  // De la A a la Z, como se ofrecen al registrar un gasto
+  readonly categoriasOrdenadas = computed(() => ordenarCategorias(this.categorias()));
   readonly mesSeleccionado = signal<string>(environment.MesInicial);
   readonly gastos = signal<ExpenseResponse[]>([]);
   readonly resumen = signal<MonthSummaryResponse | null>(null);
@@ -102,10 +98,9 @@ export class PlanillaStore {
   readonly gastosVariablesPorDia = computed(() =>
     gastosPorDia(this.gastos().filter(g => !g.isFixed), this.mesSeleccionado(), this._fechaService.fechaHoy()));
 
-  // Gastos variables del mes del más reciente al más antiguo según su fecha (la API no guarda la hora de registro);
-  // la lista muestra los que caben en su caja
+  // Los últimos 6 gastos variables registrados en el mes (por cuándo se ingresaron, no por la fecha del gasto)
   readonly ultimosGastos = computed(() =>
-    this.gastos().filter(g => !g.isFixed).sort((a, b) => b.date.localeCompare(a.date)));
+    ultimosRegistrados(this.gastos().filter(g => !g.isFixed)));
 
   /** Parte de cada persona en un gasto (monto y si está saldada), en el mismo orden que personas(). */
   partesPorPersona(gasto: ExpenseResponse): (PersonAmount | null)[] {
@@ -298,7 +293,7 @@ export class PlanillaStore {
    */
   async guardarConfiguracion(cambios: CambiosConfiguracion) {
     const actuales = new Map(this.personas().map(p => [p.id, p]));
-    const categoriasActuales = new Map(this.categorias().map(c => [c.id, c]));
+    const categoriasActuales = this.categorias();
     const mes = this.mesSeleccionado();
 
     const resp = await this.ejecutar(async () => {
@@ -315,19 +310,7 @@ export class PlanillaStore {
         }
       }
 
-      // Primero las bajas: así se puede crear una categoría nueva con el nombre de una eliminada
-      for (const id of cambios.categoriasBorradas) {
-        await this._categoriesService.eliminarCategoria(id);
-      }
-      for (const categoria of cambios.categorias) {
-        const request = { name: categoria.name, color: categoria.color };
-        const actual = categoria.id ? categoriasActuales.get(categoria.id) : undefined;
-        if (!categoria.id) {
-          await this._categoriesService.crearCategoria(request);
-        } else if (actual && (actual.name !== request.name || actual.color.toLowerCase() !== request.color.toLowerCase())) {
-          await this._categoriesService.actualizarCategoria(categoria.id, request);
-        }
-      }
+      await aplicarCambiosCategorias(this._categoriesService, categoriasActuales, cambios.categorias);
 
       await this._settingsService.actualizarConfiguracion(cambios.configuracion);
       if (cambios.arriendoMes) {

@@ -31,3 +31,8 @@ export function acumulado(dias: GastoDelDia[]): number[] {
   let total = 0;
   return dias.map(d => total += d.monto);
 }
+
+/** Los `cantidad` gastos registrados más recientemente (por cuándo se ingresaron, no por la fecha del gasto). */
+export function ultimosRegistrados<T extends { createdOn: string }>(gastos: T[], cantidad = 6): T[] {
+  return [...gastos].sort((a, b) => Date.parse(b.createdOn) - Date.parse(a.createdOn)).slice(0, cantidad);
+}

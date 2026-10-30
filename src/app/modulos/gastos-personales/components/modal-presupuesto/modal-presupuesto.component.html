@@ -1,24 +1,29 @@
 <div class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-presupuesto">
-  <div class="vidrio-fuerte rounded-3xl max-w-md w-full overflow-hidden entrada">
+  <div class="vidrio-fuerte rounded-3xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col entrada">
     <div class="px-6 py-4 bg-gradient-to-r from-indigo-500 to-violet-500 text-white flex items-center justify-between">
-      <h3 id="titulo-modal-presupuesto" class="font-bold text-base">Presupuesto personal</h3>
+      <h3 id="titulo-modal-presupuesto" class="font-bold text-base">Configuración personal</h3>
       <button type="button" (click)="store.cerrarModal()" class="text-white/80 hover:text-white p-1 rounded-lg" title="Cerrar" aria-label="Cerrar">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
-    <form (ngSubmit)="guardar()" class="p-6 space-y-4">
-      <div>
-        <label for="presupuestoMonto" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">¿Cuánto quieres gastar al mes? (CLP)</label>
-        <div class="relative">
-          <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold">$</span>
-          <input type="number" id="presupuestoMonto" name="monto" [(ngModel)]="monto" step="1000" min="1" required placeholder="Ej: 500000" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold text-base focus:ring-2 focus:ring-indigo-500 outline-none">
+    <form (ngSubmit)="guardar()" class="flex flex-col flex-1 min-h-0">
+      <div class="p-6 space-y-6 overflow-y-auto flex-1">
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">1. Presupuesto</h4>
+          <label for="presupuestoMonto" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">¿Cuánto quieres gastar al mes? (CLP)</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold">$</span>
+            <input type="number" id="presupuestoMonto" name="monto" [(ngModel)]="monto" step="1000" min="1" placeholder="Ej: 500000" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold text-base focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            Rige desde <strong>{{ store.mesSeleccionado() | nombreMes }}</strong> y en los meses siguientes hasta que lo cambies; los meses anteriores conservan el suyo.
+            El aviso se pone amarillo al llegar al {{ umbral }} % y rojo cuando te pasas.
+          </p>
         </div>
+
+        <app-editor-categorias [categorias]="store.categorias()" titulo="2. Categorías" />
       </div>
-      <p class="text-xs text-slate-500 dark:text-slate-400">
-        Rige desde <strong>{{ store.mesSeleccionado() | nombreMes }}</strong> y en los meses siguientes hasta que lo cambies; los meses anteriores conservan el suyo.
-        El aviso se pone amarillo al llegar al {{ umbral }} % y rojo cuando te pasas.
-      </p>
-      <div class="pt-3 flex gap-2">
+      <div class="px-6 py-4 bg-white/40 dark:bg-white/[0.03] border-t border-white/60 dark:border-white/10 flex gap-2">
         <button type="button" (click)="store.cerrarModal()" class="flex-1 py-2.5 rounded-xl boton-vidrio text-sm">Cancelar</button>
         <button type="submit" [disabled]="guardando" class="flex-1 py-2.5 rounded-xl boton-principal text-sm">Guardar</button>
       </div>
