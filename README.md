@@ -49,7 +49,9 @@ gastos, categorías, tabla y alta/edición/eliminación (con cuotas). Al cambiar
 
 **Gasto mensual**: barras con el total de los últimos 6 meses hasta el mes que se ve (al tocar una se va a ese mes).
 En la planilla compartida reemplaza al gasto por día y separa arriendo y fijos de los variables; en los gastos
-personales va junto al gasto por día y cada barra toma el color del aviso según su presupuesto (línea punteada).
+personales va en una fila con el gasto por día y los últimos gastos (fila acordeón: desde 1024 px, la tarjeta bajo el
+mouse se agranda y las otras ceden espacio; en el teléfono van apiladas) y cada barra toma el color del aviso según su
+presupuesto (línea punteada). La distribución por categoría queda debajo, a todo el ancho.
 
 **Aviso de presupuesto**: muestra lo gastado contra el presupuesto configurado (botón *Presupuesto*). El color cambia de
 forma continua: verde, amarillo desde el umbral de aviso (`UmbralAvisoPresupuesto` en `config.json`, 75 %), naranjo al

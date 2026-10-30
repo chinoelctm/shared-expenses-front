@@ -181,6 +181,27 @@ body.fondo-app {
     @apply text-white bg-gradient-to-r from-indigo-500 to-violet-500 shadow-md shadow-indigo-500/25;
   }
 
+  // Fila acordeón: en el teléfono y la tablet las tarjetas van apiladas; desde 1024 px van en una línea con el mismo
+  // ancho y la que tiene el mouse (o el foco del teclado) crece mientras las otras ceden espacio. Con el clic no queda
+  // agrandada: :focus-visible solo aplica al navegar con teclado
+  .fila-acordeon {
+    @apply flex flex-col lg:flex-row gap-4 sm:gap-5;
+  }
+
+  .fila-acordeon > * {
+    flex: 1 1 0;
+    min-width: 0;
+    transition: flex-grow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  // Solo con mouse: en pantallas táctiles el "hover" queda pegado tras tocar
+  @media (min-width: 1024px) and (hover: hover) {
+    .fila-acordeon > *:hover,
+    .fila-acordeon > *:has(:focus-visible) {
+      flex-grow: 2.2;
+    }
+  }
+
   // Campos de formulario sobre vidrio: casi opacos para leer bien lo que se escribe
   .campo {
     @apply bg-white/85 dark:bg-slate-900/70 border border-white/80 dark:border-white/10 text-slate-900 dark:text-white
@@ -196,6 +217,10 @@ body.fondo-app {
   .dibujar,
   .fade-enter {
     animation: none;
+  }
+
+  .fila-acordeon > * {
+    transition: none;
   }
 
   .levantar,
